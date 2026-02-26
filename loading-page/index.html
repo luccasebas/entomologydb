@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loading | EntomologyDB</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <main class="loading-wrap">
+
+    <section class="loading-card">
+
+      <!-- beetle logo circle -->
+      <div class="logo">
+        <img
+          src="./icons/beetle.png"
+          alt="Seed beetle icon"
+          class="beetle-img"
+        />
+      </div>
+
+      <!-- loading text -->
+      <div class="loading-text">
+        <span>LOADING</span>
+        <span id="dots">...</span>
+      </div>
+
+      <!-- fact text -->
+      <p class="fact">
+        <span class="fact-bold">DID YOU KNOW?</span>
+        SEED BEETLES OFTEN EXHIBIT A PROMINENT POSTERIOR END, KNOWN AS THE PYGIDIUM
+      </p>
+
+    </section>
+
+  </main>
+
+  <!-- optional animated dots -->
+  <script>
+    const dots = document.getElementById("dots");
+    const frames = [".", "..", "..."];
+    let i = 0;
+
+    setInterval(() => {
+      i = (i + 1) % frames.length;
+      dots.textContent = frames[i];
+    }, 500);
+  </script>
+
+</body>
+</html>
