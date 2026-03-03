@@ -1,74 +1,124 @@
 :root {
   --bg: #ffffff;
-  --text: #0f0f10;
-  --muted: #202124;
+  --ink: #111111;
+  --muted: #2a2a2a;
+  --bar: #6f7fa4; /* matches your blue-gray header */
 }
 
 * { box-sizing: border-box; }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   margin: 0;
   background: var(--bg);
-  color: var(--text);
+  color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.page {
-  min-height: 100%;
+/* Top bar */
+.topbar {
+  height: 76px;
+  background: var(--bar);
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: center;
 }
 
-/* matches the screenshot: lots of whitespace, content pushed inward */
+.topbar-inner {
+  width: 100%;
+  padding: 0 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Brand (logo + name) */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.brand-logo {
+  width: 34px;
+  height: 34px;
+  display: block;
+}
+
+.brand-name {
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: 0.2px;
+}
+
+/* Nav links */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 58px; /* wide spacing like your mock */
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.2px;
+}
+
+.nav-link:hover {
+  opacity: 0.9;
+}
+
+.nav-link.active {
+  color: #ffffff;
+  text-decoration: none;
+  position: relative;
+}
+
+/* optional subtle underline for active tab */
+.nav-link.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+}
+
+/* Page content */
+.page {
+  min-height: calc(100vh - 76px);
+}
+
 .content {
-  padding: 120px 0 0 110px;
-  max-width: 780px;
+  padding: 92px 0 0 110px;
+  max-width: 900px;
 }
 
 h1 {
-  margin: 0 0 26px 0;
-  font-size: 44px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  margin: 0 0 34px 0;
+  font-size: 72px; /* big like your screenshot */
+  font-weight: 900;
+  letter-spacing: -1px;
 }
 
 .about-text {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.7;
   color: var(--muted);
-  max-width: 680px;
+  max-width: 760px;
 }
 
-/* optional back link styling if you use it */
-.back-link {
-  display: inline-block;
-  margin-top: 28px;
-  font-size: 16px;
-  text-decoration: none;
-  color: var(--text);
-}
-
-.back-link:hover {
-  text-decoration: underline;
-}
-
-/* responsive: keep the same vibe but fit smaller screens */
-@media (max-width: 720px) {
-  .content {
-    padding: 72px 18px 0 18px;
-  }
-
-  h1 {
-    font-size: 36px;
-  }
-
-  .about-text {
-    font-size: 16px;
-  }
+/* Responsive */
+@media (max-width: 980px) {
+  .nav { gap: 26px; }
+  .nav-link { font-size: 18px; }
+  h1 { font-size: 52px; }
+  .content { padding: 64px 18px 0 18px; }
 }
