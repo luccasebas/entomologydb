@@ -5,6 +5,8 @@ let bboxBtnEl = null;
 const BBOX_SOURCE_ID = "user-bbox";
 const BBOX_FILL_ID = "user-bbox-fill";
 const BBOX_LINE_ID = "user-bbox-line";
+const PANEL_WIDTH = 300;
+const DEFAULT_PADDING = 160;
 
 const map = new maplibregl.Map({
   container: "map",
@@ -13,15 +15,18 @@ const map = new maplibregl.Map({
   zoom: 10
 });
 
-function toggleSection(element) {
-  const content = element.nextElementSibling;
-  const arrow = element.querySelector(".arrow");
+function fitBoundsWithPanel(bounds) {
+  const panelOpen = document.querySelector(".page-shell")?.classList.contains("panel-open");
 
-  content.classList.toggle("open");
-  arrow.classList.toggle("rotate");
+  map.fitBounds(bounds, {
+    padding: {
+      top: DEFAULT_PADDING,
+      right: DEFAULT_PADDING,
+      bottom: DEFAULT_PADDING,
+      left: panelOpen ? PANEL_WIDTH + DEFAULT_PADDING : DEFAULT_PADDING
+    }
+  });
 }
-
-/* ---------- BBOX HELPERS ---------- */
 
 function ensureBboxLayers() {
   if (map.getSource(BBOX_SOURCE_ID)) return;
@@ -30,7 +35,10 @@ function ensureBboxLayers() {
     type: "geojson",
     data: {
       type: "Feature",
-      geometry: { type: "Polygon", coordinates: [[]] }
+      geometry: {
+        type: "Polygon",
+        coordinates: [[]]
+      }
     }
   });
 
@@ -59,9 +67,13 @@ function ensureBboxLayers() {
 function clearBbox() {
   const src = map.getSource(BBOX_SOURCE_ID);
   if (!src) return;
+
   src.setData({
     type: "Feature",
-    geometry: { type: "Polygon", coordinates: [[]] }
+    geometry: {
+      type: "Polygon",
+      coordinates: [[]]
+    }
   });
 }
 
@@ -95,7 +107,10 @@ function setBboxPreview(a, b) {
 function setBboxMode(on) {
   bboxMode = on;
   map.getCanvas().style.cursor = on ? "crosshair" : "";
-  if (bboxBtnEl) bboxBtnEl.classList.toggle("active", on);
+
+  if (bboxBtnEl) {
+    bboxBtnEl.classList.toggle("active", on);
+  }
 
   if (!on) {
     firstCorner = null;
@@ -107,12 +122,8 @@ function setBboxMode(on) {
   }
 }
 
-/* ---------- REAL NAV CONTROL ---------- */
-
 const nav = new maplibregl.NavigationControl({ visualizePitch: true });
 map.addControl(nav, "top-right");
-
-/* ---------- BBOX CONTROL ---------- */
 
 class BBoxControl {
   onAdd(mapInstance) {
@@ -127,9 +138,18 @@ class BBoxControl {
     bboxBtn.title = "Bounding box";
     bboxBtn.innerHTML = `
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="5" y="6" width="14" height="12" rx="2" ry="2"
-              fill="none" stroke="currentColor" stroke-width="2"
-              stroke-dasharray="3 2" />
+        <rect
+          x="5"
+          y="6"
+          width="14"
+          height="12"
+          rx="2"
+          ry="2"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-dasharray="3 2"
+        />
       </svg>
     `;
 
@@ -139,9 +159,13 @@ class BBoxControl {
     clearBtn.title = "Clear bounding box";
     clearBtn.innerHTML = `
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6 6l12 12M18 6L6 18"
-              fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round"/>
+        <path
+          d="M6 6l12 12M18 6L6 18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
       </svg>
     `;
 
@@ -175,8 +199,6 @@ class BBoxControl {
 
 map.addControl(new BBoxControl(), "top-right");
 
-/* ---------- LOAD ---------- */
-
 map.on("load", () => {
   ensureBboxLayers();
 
@@ -193,14 +215,12 @@ map.on("load", () => {
     worldBtn.addEventListener("click", (e) => {
       e.preventDefault();
       setBboxMode(false);
-      map.fitBounds([[-180, -85], [180, 85]], { padding: 20 });
+      fitBoundsWithPanel([[-180, -85], [180, 85]]);
     });
 
     navContainer.appendChild(worldBtn);
   }
 });
-
-/* ---------- TWO-CLICK BBOX ---------- */
 
 map.on("mousemove", (e) => {
   if (!bboxMode) return;
@@ -225,7 +245,6 @@ map.on("click", (e) => {
   const south = Math.min(firstCorner.lat, secondCorner.lat);
   const north = Math.max(firstCorner.lat, secondCorner.lat);
 
-  map.fitBounds([[west, south], [east, north]], { padding: 40 });
-
+  fitBoundsWithPanel([[west, south], [east, north]]);
   setBboxMode(false);
 });
