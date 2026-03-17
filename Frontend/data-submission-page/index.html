@@ -204,30 +204,6 @@
           input.click();
         }
       });
-
-      dropzone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropzone.classList.add("dragover");
-      });
-
-      dropzone.addEventListener("dragleave", () => {
-        dropzone.classList.remove("dragover");
-      });
-
-      dropzone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropzone.classList.remove("dragover");
-
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          input.files = e.dataTransfer.files;
-
-          if (inputId === "photoFile") {
-            updateFileName(input, "photoFileName");
-          } else if (inputId === "infoFile") {
-            updateFileName(input, "infoFileName");
-          }
-        }
-      });
     }
 
     document.querySelectorAll(".dropzone").forEach(setupDropzone);
@@ -251,8 +227,15 @@
       const lastName = lastNameInput.value.trim();
       const email = emailInput.value.trim();
 
+      clearMessage();
+
       if (!firstName || !lastName || !email) {
         showMessage("Please fill out all contact information before submitting.", true);
+        return;
+      }
+
+      if (!emailInput.checkValidity()) {
+        showMessage("Please enter a valid email address.", true);
         return;
       }
 
@@ -289,12 +272,7 @@
           throw new Error(result.error || "Submission failed.");
         }
 
-        let uploadedList = "";
-        if (result.savedFiles && result.savedFiles.length > 0) {
-          uploadedList = " Uploaded files: " + result.savedFiles.join(", ");
-        }
-
-        showMessage("Your submission has been received successfully." + uploadedList, false);
+        showMessage("Your submission has been received successfully.", false);
 
         contactForm.reset();
         photoFileInput.value = "";
