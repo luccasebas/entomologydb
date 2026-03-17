@@ -6,14 +6,15 @@
   <title>Search | BruchinDB</title>
 
   <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="../map-page/style.css" />
 </head>
 
 <body>
 
-  <div class="search-layout">
+  <div class="page-shell panel-open search-layout-mode">
 
     <!-- LEFT FILTER PANEL -->
-    <aside class="filter-panel">
+    <aside class="filter-panel is-open" id="filterPanel">
 
       <div class="filter-header">
         <h2>Search</h2>
@@ -39,7 +40,6 @@
 
         <div class="filter-content">
 
-          <!-- Country -->
           <div class="location-group">
             <input type="text" placeholder="Country..." />
             <select>
@@ -50,7 +50,6 @@
             </select>
           </div>
 
-          <!-- Province / State -->
           <div class="location-group">
             <input type="text" placeholder="Province / State..." />
             <select>
@@ -61,7 +60,6 @@
             </select>
           </div>
 
-          <!-- County -->
           <div class="location-group">
             <input type="text" placeholder="County..." />
             <select>
@@ -71,7 +69,6 @@
             </select>
           </div>
 
-          <!-- Minimum Elevation -->
           <div class="location-group">
             <input type="number" placeholder="Minimum elevation (m)..." min="0" />
           </div>
@@ -132,97 +129,152 @@
     </aside>
 
 
-    <!-- RESULTS PANEL -->
-    <main class="results-panel">
+    <!-- MAIN VIEW -->
+    <main class="main-view">
 
-      <div class="cards-grid">
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Bean Weevil</h3>
-            <p class="sci-name"><em>(Acanthoscelides obtectus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Pea Weevil</h3>
-            <p class="sci-name"><em>(Bruchus pisorum)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Clover Seed Beetle</h3>
-            <p class="sci-name"><em>(Acanthoscelides pauperculus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Licorice Seed Beetle</h3>
-            <p class="sci-name"><em>(Acanthoscelides aureolus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Bean Weevil</h3>
-            <p class="sci-name"><em>(Acanthoscelides obtectus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Pea Weevil</h3>
-            <p class="sci-name"><em>(Bruchus rufimanus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
+      <div class="view-toolbar">
+        <button class="view-btn" id="filtersBtn" type="button">Filters</button>
+        <a class="view-btn secondary" href="../map-page/index.html">View Map</a>
       </div>
+
+      <div class="results-panel">
+        <div class="cards-grid">
+
+          <article class="species-card">
+            <div class="species-info">
+              <h3>Bean Weevil</h3>
+              <p class="sci-name"><em>(Acanthoscelides obtectus)</em></p>
+              <a class="learn-more" href="./species.html">Learn More →</a>
+            </div>
+            <img
+              class="species-img"
+              src="./seed_beetle_logo_transparent.png"
+              alt="Seed beetle placeholder"
+            />
+          </article>
+
+          <article class="species-card">
+            <div class="species-info">
+              <h3>Pea Weevil</h3>
+              <p class="sci-name"><em>(Bruchus pisorum)</em></p>
+              <a class="learn-more" href="./species.html">Learn More →</a>
+            </div>
+            <img
+              class="species-img"
+              src="./seed_beetle_logo_transparent.png"
+              alt="Seed beetle placeholder"
+            />
+          </article>
+
+          <article class="species-card">
+            <div class="species-info">
+              <h3>Clover Seed Beetle</h3>
+              <p class="sci-name"><em>(Acanthoscelides pauperculus)</em></p>
+              <a class="learn-more" href="./species.html">Learn More →</a>
+            </div>
+            <img
+              class="species-img"
+              src="./seed_beetle_logo_transparent.png"
+              alt="Seed beetle placeholder"
+            />
+          </article>
+
+          <article class="species-card">
+            <div class="species-info">
+              <h3>Licorice Seed Beetle</h3>
+              <p class="sci-name"><em>(Acanthoscelides aureolus)</em></p>
+              <a class="learn-more" href="./species.html">Learn More →</a>
+            </div>
+            <img
+              class="species-img"
+              src="./seed_beetle_logo_transparent.png"
+              alt="Seed beetle placeholder"
+            />
+          </article>
+
+          <article class="species-card">
+            <div class="species-info">
+              <h3>Bean Weevil</h3>
+              <p class="sci-name"><em>(Acanthoscelides obtectus)</em></p>
+              <a class="learn-more" href="./species.html">Learn More →</a>
+            </div>
+            <img
+              class="species-img"
+              src="./seed_beetle_logo_transparent.png"
+              alt="Seed beetle placeholder"
+            />
+          </article>
+
+          <article class="species-card">
+            <div class="species-info">
+              <h3>Pea Weevil</h3>
+              <p class="sci-name"><em>(Bruchus rufimanus)</em></p>
+              <a class="learn-more" href="./species.html">Learn More →</a>
+            </div>
+            <img
+              class="species-img"
+              src="./seed_beetle_logo_transparent.png"
+              alt="Seed beetle placeholder"
+            />
+          </article>
+
+        </div>
+      </div>
+
     </main>
-
-
 
   </div>
 
   <script src="./search.js"></script>
+
+  <script>
+    const pageShell = document.querySelector(".page-shell");
+    const filterPanel = document.getElementById("filterPanel");
+    const filtersBtn = document.getElementById("filtersBtn");
+
+    function setPanelState(open) {
+      if (open) {
+        pageShell.classList.remove("panel-closed");
+        pageShell.classList.add("panel-open");
+        filterPanel.classList.remove("is-closed");
+        filterPanel.classList.add("is-open");
+      } else {
+        pageShell.classList.remove("panel-open");
+        pageShell.classList.add("panel-closed");
+        filterPanel.classList.remove("is-open");
+        filterPanel.classList.add("is-closed");
+      }
+    }
+
+    const mainView = document.querySelector(".main-view");
+
+    function togglePanel() {
+      const isClosed = pageShell.classList.contains("panel-closed");
+      setPanelState(isClosed);
+
+      if (window.map) {
+        window.map.resize();
+      }
+    }
+
+    function toggleSection(element) {
+      const content = element.nextElementSibling;
+      const arrow = element.querySelector(".arrow");
+      if (!content || !arrow) return;
+      content.classList.toggle("open");
+      arrow.classList.toggle("rotate");
+    }
+
+    filtersBtn.addEventListener("click", togglePanel);
+
+    setPanelState(true);
+
+    mainView.addEventListener("transitionend", (e) => {
+      if (e.propertyName === "left" && window.map) {
+        window.map.resize();
+      }
+    });
+  </script>
 
 </body>
 </html>

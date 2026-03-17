@@ -1,31 +1,41 @@
-/* Layout */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f4f6f8;
 }
 
-.search-layout {
-  display: flex;
+.page-shell {
+  --panel-width: 300px;
+  position: relative;
   height: 100vh;
+  overflow: hidden;
 }
 
-/* LEFT PANEL */
+/* FILTER PANEL */
 .filter-panel {
-  width: 300px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--panel-width);
+  height: 100%;
   background: #ffffff;
   border-right: 1px solid #ddd;
   overflow-y: auto;
+  z-index: 40;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.filter-panel.is-closed {
+  transform: translateX(-100%);
 }
 
 .filter-header {
   background: #7688b1;
   color: white;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   height: 120px;
   padding: 0 20px;
 }
@@ -79,6 +89,15 @@ body {
   box-sizing: border-box;
 }
 
+.location-group {
+  margin-bottom: 22px;
+}
+
+.location-group input,
+.location-group select {
+  margin-bottom: 8px;
+}
+
 .checkbox-label {
   display: flex;
   align-items: center;
@@ -95,30 +114,136 @@ body {
   justify-content: center;
 }
 
-.location-group {
-  margin-bottom: 22px;
-}
-
-.location-group input,
-.location-group select {
-  margin-bottom: 8px;
-}
-
-/* RIGHT PANEL */
-.results-panel {
-  flex: 1;
+/* HANDLE */
+.panel-handle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: var(--panel-width);
+  width: 18px;
+  height: 54px;
+  border: 1px solid #ddd;
+  border-left: none;
+  background: white;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.08);
+  z-index: 60;
+  transition: left 0.3s ease;
 }
 
+.page-shell.panel-closed .panel-handle {
+  left: 0;
+}
+
+.panel-handle:hover {
+  background: #f5f5f5;
+}
+
+/* MAIN VIEW */
+.main-view {
+  position: absolute;
+  inset: 0;
+}
+
+/* FLOATING TOOLBAR */
+.view-toolbar {
+  position: absolute;
+  top: 18px;
+  left: calc(var(--panel-width) + 18px);
+  z-index: 50;
+  display: flex;
+  gap: 10px;
+  transition: left 0.3s ease;
+}
+
+.page-shell.panel-closed .view-toolbar {
+  left: 18px;
+}
+
+.view-btn {
+  border: 1px solid rgba(0,0,0,0.15);
+  background: white;
+  color: #111;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.view-btn:hover {
+  background: #f2f2f2;
+}
+
+.view-btn.secondary {
+  font-weight: 500;
+}
+
+/* SEARCH PAGE CONTENT */
+.results-panel {
+  position: absolute;
+  inset: 0;
+  padding: 80px 40px 40px 40px;
+  overflow-y: auto;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 26px;
+}
+
+.species-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px 18px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 120px;
+}
+
+.species-info h3 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+}
+
+.sci-name {
+  margin: 0 0 12px 0;
+  color: #555;
+}
+
+.learn-more {
+  color: #111;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.learn-more:hover {
+  text-decoration: underline;
+}
+
+.species-img {
+  width: 120px;
+  height: 90px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+/* MAP */
 #map {
   position: absolute;
   inset: 0;
 }
 
-/* ---------- MAP CONTROLS ---------- */
-
+/* MAP CONTROLS */
 .maplibregl-ctrl-group button {
   width: 44px;
   height: 44px;
@@ -158,4 +283,33 @@ body {
 
 .bbox-btn.active:hover {
   background: #111111;
+}
+
+@media (max-width: 900px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* SEARCH PAGE ONLY: panel pushes results over */
+.search-layout-mode .main-view {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: var(--panel-width);
+  transition: left 0.3s ease;
+}
+
+.search-layout-mode.panel-closed .main-view {
+  left: 0;
+}
+
+.search-layout-mode .view-toolbar {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 50;
+  display: flex;
+  gap: 10px;
 }
