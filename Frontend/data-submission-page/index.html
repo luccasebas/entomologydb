@@ -9,10 +9,10 @@
 
 <body>
 
-  <!-- Top Nav Bar (same pattern as About page) -->
+  <!-- Top Nav Bar -->
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="#">
+      <a class="brand" href="../search-page/index.html">
         <img
           src="./icons/bruchindb-logo.png"
           alt="BruchinDB logo"
@@ -25,14 +25,12 @@
         <a class="nav-link" href="../search-page/index.html">Search</a>
         <a class="nav-link" href="../map-page/index.html">Map</a>
         <a class="nav-link" href="#">Learn</a>
-        <a class="nav-link active" href="../data submission-page/index.html">Submit Data</a>
+        <a class="nav-link active" href="../data-submission-page/index.html">Submit Data</a>
         <a class="nav-link" href="../about-page/index.html">About</a>
       </nav>
-
     </div>
   </header>
 
-  <!-- Intro section -->
   <main class="page">
     <section class="intro">
       <h1>Submit Data</h1>
@@ -47,14 +45,20 @@
       <div class="blue-inner">
         <h2>Upload Photo</h2>
 
-        <div class="dropzone" role="button" tabindex="0" aria-label="Upload a file">
+        <div class="dropzone" role="button" tabindex="0" aria-label="Upload a photo file">
           <div class="dropzone-box">
             <div class="dz-icon" aria-hidden="true">☁︎</div>
             <div class="dz-title">Upload a File</div>
             <div class="dz-sub">Drag and drop files here</div>
+            <div class="file-name" aria-live="polite"></div>
           </div>
 
-          <input class="file-input" type="file" aria-label="Choose file to upload" />
+          <input
+            class="file-input"
+            id="photoFile"
+            type="file"
+            aria-label="Choose photo file to upload"
+          />
         </div>
       </div>
     </section>
@@ -64,19 +68,25 @@
       <div class="blue-inner">
         <h2>Upload Additional Information</h2>
 
-        <div class="dropzone" role="button" tabindex="0" aria-label="Upload a file">
+        <div class="dropzone" role="button" tabindex="0" aria-label="Upload an additional information file">
           <div class="dropzone-box">
             <div class="dz-icon" aria-hidden="true">☁︎</div>
             <div class="dz-title">Upload a File</div>
             <div class="dz-sub">Drag and drop files here</div>
+            <div class="file-name" aria-live="polite"></div>
           </div>
 
-          <input class="file-input" type="file" aria-label="Choose file to upload" />
+          <input
+            class="file-input"
+            id="infoFile"
+            type="file"
+            aria-label="Choose additional information file to upload"
+          />
         </div>
 
         <h2 class="contact-title">Contact Information</h2>
 
-        <form class="contact-form" action="#" method="post">
+        <form class="contact-form" id="contactForm" action="#" method="post" novalidate>
           <div class="field-row">
             <label class="field-label" for="firstName">Full Name</label>
 
@@ -125,18 +135,65 @@
 
     <!-- Submit button section -->
     <section class="submit-section">
-      <button class="submit-btn" type="button">Submit</button>
+      <button class="submit-btn" id="submitBtn" type="button">Submit</button>
+
+      <p id="confirmationMessage" class="confirmation hidden" aria-live="polite">
+        Your submission has been received!
+      </p>
     </section>
   </main>
 
   <script>
-    // Make the entire dropzone clickable to open the file picker
+    // make each dropzone clickable and show selected filename
     document.querySelectorAll(".dropzone").forEach((dz) => {
       const input = dz.querySelector(".file-input");
+      const fileNameDisplay = dz.querySelector(".file-name");
 
-      dz.addEventListener("click", () => input.click());
+      dz.addEventListener("click", () => {
+        input.click();
+      });
+
       dz.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") input.click();
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          input.click();
+        }
+      });
+
+      input.addEventListener("change", () => {
+        if (input.files && input.files.length > 0) {
+          fileNameDisplay.textContent = "Selected: " + input.files[0].name;
+        } else {
+          fileNameDisplay.textContent = "";
+        }
+      });
+    });
+
+    // submit interaction
+    const submitBtn = document.getElementById("submitBtn");
+    const confirmation = document.getElementById("confirmationMessage");
+    const firstNameInput = document.getElementById("firstName");
+    const lastNameInput = document.getElementById("lastName");
+    const emailInput = document.getElementById("email");
+    const contactForm = document.getElementById("contactForm");
+
+    submitBtn.addEventListener("click", () => {
+      const firstName = firstNameInput.value.trim();
+      const lastName = lastNameInput.value.trim();
+      const email = emailInput.value.trim();
+
+      if (!firstName || !lastName || !email) {
+        alert("Please fill out all fields before submitting.");
+        return;
+      }
+
+      confirmation.classList.remove("hidden");
+      confirmation.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      // optional: reset form fields after successful submit
+      contactForm.reset();
+      document.querySelectorAll(".file-name").forEach((el) => {
+        el.textContent = "";
       });
     });
   </script>
