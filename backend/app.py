@@ -21,8 +21,8 @@ ALLOWED_EXTENSIONS = {
     "pdf", "doc", "docx", "txt", "csv", "xlsx"
 }
 
-EMAIL_SENDER = "jwbayon23@gmail.com"
-EMAIL_RECEIVER = "jwbayon23@gmail.com"
+EMAIL_SENDER = "gmorse@sandiego.edu"
+EMAIL_RECEIVER = "gmorse@sandiego.edu"
 EMAIL_APP_PASSWORD = "hixpmpxqjqympjja"
 
 
