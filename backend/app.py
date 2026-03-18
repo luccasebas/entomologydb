@@ -23,6 +23,8 @@ ALLOWED_EXTENSIONS = {
 
 EMAIL_SENDER = "jwbayon23@gmail.com"
 EMAIL_RECEIVER = "jwbayon23@gmail.com"
+EMAIL_APP_BEETLE = "hixpmpxqjqympjja"
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -68,7 +70,7 @@ Attached files:
         )
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-        smtp.login(EMAIL_SENDER, EMAIL_APP_PASSWORD)
+        smtp.login(EMAIL_SENDER, EMAIL_APP_BEETLE)
         smtp.send_message(msg)
 
 
