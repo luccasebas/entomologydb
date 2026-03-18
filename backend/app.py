@@ -23,8 +23,7 @@ ALLOWED_EXTENSIONS = {
 
 EMAIL_SENDER = "jwbayon23@gmail.com"
 EMAIL_RECEIVER = "jwbayon23@gmail.com"
-EMAIL_APP_PASSWORD = "ujtmtvjrclvabhsx"
-
+EMAIL_APP_PASSWORD = os.getenv("BRUCHINDB_EMAIL_APP_PASSWORD")
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
