@@ -21,10 +21,8 @@ ALLOWED_EXTENSIONS = {
     "pdf", "doc", "docx", "txt", "csv", "xlsx"
 }
 
-EMAIL_SENDER = "gmorse@sandiego.edu"
-EMAIL_RECEIVER = "gmorse@sandiego.edu"
-EMAIL_APP_PASSWORD = "hixpmpxqjqympjja"
-
+EMAIL_SENDER = "jwbayon23@gmail.com"
+EMAIL_RECEIVER = "jwbayon23@gmail.com"
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
