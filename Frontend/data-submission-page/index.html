@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Submit Data | BruchinDB</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+
+  <!-- Top Nav Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../search-page/index.html">
+        <img src="./icons/bruchindb-logo.png" alt="BruchinDB logo" class="brand-logo" />
+        <span class="brand-name">BruchinDB</span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav-link" href="../search-page/index.html">Search</a>
+        <a class="nav-link" href="../map-page/index.html">Map</a>
+        <a class="nav-link" href="../loading-page/index.html">Learn</a>
+        <a class="nav-link active" href="../data-submission-page/index.html">Submit Data</a>
+        <a class="nav-link" href="../about-page/index.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="intro">
+      <h1>Submit Data</h1>
+
+      <p class="intro-text">
+        Researchers and interested contributors may propose new seed beetle records, images, or data updates through the BruchinDB submission system. Submissions are reviewed by the database administrator before being approved and incorporated to ensure scientific accuracy and consistency. Detailed instructions for submitting materials are available below, and contributors are encouraged to share verified information that may improve or expand the database.
+      </p>
+    </section>
+
+    <!-- Upload Photo block -->
+    <section class="blue-section">
+      <div class="blue-inner">
+        <h2>Upload Photo</h2>
+
+        <div
+          class="dropzone"
+          role="button"
+          tabindex="0"
+          aria-label="Upload a photo file"
+          data-input-id="photoFile"
+        >
+          <div class="dropzone-box">
+            <div class="dz-icon" aria-hidden="true">☁︎</div>
+            <div class="dz-title">Upload a File</div>
+            <div class="dz-sub">Drag and drop files here</div>
+            <div class="file-name" id="photoFileName" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <input
+          class="file-input hidden-input"
+          id="photoFile"
+          type="file"
+          aria-label="Choose photo file to upload"
+        />
+      </div>
+    </section>
+
+    <!-- Upload Additional Information + Contact Information -->
+    <section class="blue-section blue-section-2">
+      <div class="blue-inner">
+        <h2>Upload Additional Information</h2>
+
+        <div
+          class="dropzone"
+          role="button"
+          tabindex="0"
+          aria-label="Upload an additional information file"
+          data-input-id="infoFile"
+        >
+          <div class="dropzone-box">
+            <div class="dz-icon" aria-hidden="true">☁︎</div>
+            <div class="dz-title">Upload a File</div>
+            <div class="dz-sub">Drag and drop files here</div>
+            <div class="file-name" id="infoFileName" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <input
+          class="file-input hidden-input"
+          id="infoFile"
+          type="file"
+          aria-label="Choose additional information file to upload"
+        />
+
+        <h2 class="contact-title">Contact Information</h2>
+
+        <form class="contact-form" id="contactForm" action="#" method="post" novalidate>
+          <div class="field-row">
+            <label class="field-label" for="firstName">Full Name</label>
+
+            <div class="name-grid">
+              <div class="input-wrap">
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  class="input"
+                  placeholder="First Name"
+                  autocomplete="given-name"
+                />
+              </div>
+
+              <div class="input-wrap">
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  class="input"
+                  placeholder="Last Name"
+                  autocomplete="family-name"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <label class="field-label" for="email">E-mail</label>
+
+            <div class="input-wrap full">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                class="input"
+                placeholder="ex: myname@example.com"
+                autocomplete="email"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Submit button section -->
+    <section class="submit-section">
+      <div class="submit-wrap">
+        <button class="submit-btn" id="submitBtn" type="button">Submit</button>
+
+        <p id="confirmationMessage" class="confirmation hidden" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const BACKEND_URL = "http://127.0.0.1:5000/upload";
+
+    const submitBtn = document.getElementById("submitBtn");
+    const confirmation = document.getElementById("confirmationMessage");
+    const firstNameInput = document.getElementById("firstName");
+    const lastNameInput = document.getElementById("lastName");
+    const emailInput = document.getElementById("email");
+    const photoFileInput = document.getElementById("photoFile");
+    const infoFileInput = document.getElementById("infoFile");
+    const contactForm = document.getElementById("contactForm");
+
+    function showMessage(message, isError = false) {
+      confirmation.textContent = message;
+      confirmation.classList.remove("hidden", "success", "error");
+      confirmation.classList.add(isError ? "error" : "success");
+      confirmation.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function clearMessage() {
+      confirmation.textContent = "";
+      confirmation.classList.add("hidden");
+      confirmation.classList.remove("success", "error");
+    }
+
+    function updateFileName(input, displayId) {
+      const display = document.getElementById(displayId);
+
+      if (input.files && input.files.length > 0) {
+        display.textContent = "Selected: " + input.files[0].name;
+      } else {
+        display.textContent = "";
+      }
+    }
+
+    function setupDropzone(dropzone) {
+      const inputId = dropzone.dataset.inputId;
+      const input = document.getElementById(inputId);
+
+      dropzone.addEventListener("click", () => {
+        input.click();
+      });
+
+      dropzone.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          input.click();
+        }
+      });
+    }
+
+    document.querySelectorAll(".dropzone").forEach(setupDropzone);
+
+    photoFileInput.addEventListener("change", () => {
+      updateFileName(photoFileInput, "photoFileName");
+      clearMessage();
+    });
+
+    infoFileInput.addEventListener("change", () => {
+      updateFileName(infoFileInput, "infoFileName");
+      clearMessage();
+    });
+
+    [firstNameInput, lastNameInput, emailInput].forEach((input) => {
+      input.addEventListener("input", clearMessage);
+    });
+
+    submitBtn.addEventListener("click", async () => {
+      const firstName = firstNameInput.value.trim();
+      const lastName = lastNameInput.value.trim();
+      const email = emailInput.value.trim();
+
+      clearMessage();
+
+      if (!firstName || !lastName || !email) {
+        showMessage("Please fill out all contact information before submitting.", true);
+        return;
+      }
+
+      if (!emailInput.checkValidity()) {
+        showMessage("Please enter a valid email address.", true);
+        return;
+      }
+
+      if (!photoFileInput.files.length && !infoFileInput.files.length) {
+        showMessage("Please upload at least one file before submitting.", true);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("email", email);
+
+      if (photoFileInput.files.length > 0) {
+        formData.append("photoFile", photoFileInput.files[0]);
+      }
+
+      if (infoFileInput.files.length > 0) {
+        formData.append("infoFile", infoFileInput.files[0]);
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      try {
+        const response = await fetch(BACKEND_URL, {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || "Submission failed.");
+        }
+
+        showMessage("Your submission has been received successfully.", false);
+
+        contactForm.reset();
+        photoFileInput.value = "";
+        infoFileInput.value = "";
+        document.getElementById("photoFileName").textContent = "";
+        document.getElementById("infoFileName").textContent = "";
+      } catch (error) {
+        showMessage(error.message || "Could not connect to the server.", true);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+      }
+    });
+  </script>
+
+</body>
+</html>
