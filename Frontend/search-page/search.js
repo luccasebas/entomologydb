@@ -510,3 +510,22 @@ if (resetBtn) {
 // Initial load
 updateBanner();
 runSearch(true);  // try cache first
+
+
+// Sort dropdown
+const sortSelect = document.getElementById('sortSelect');
+if (sortSelect) {
+  sortSelect.addEventListener('change', () => {
+    if (!lastResults || lastResults.length === 0) return;
+    const mode = sortSelect.value;
+    lastResults.sort((a, b) => {
+      if (mode === 'az') return a.Full_name.localeCompare(b.Full_name);
+      if (mode === 'za') return b.Full_name.localeCompare(a.Full_name);
+      if (mode === 'newest') return (parseInt(b.Year) || 0) - (parseInt(a.Year) || 0);
+      if (mode === 'oldest') return (parseInt(a.Year) || 0) - (parseInt(b.Year) || 0);
+      return 0;
+    });
+    currentPage = 1;
+    renderPage();
+  });
+}

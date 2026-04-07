@@ -6,22 +6,39 @@
   <title>Search | BruchinDB</title>
 
   <link rel="stylesheet" href="./style.css" />
-  <link rel="stylesheet" href="../map-page/style.css" />
 </head>
 
 <body>
 
-  <div class="page-shell panel-open search-layout-mode">
+  <!-- Top Nav Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../search-page/index.html">
+        <img src="./icons/bruchindb-logo.png" alt="BruchinDB logo" class="brand-logo" />
+        <span class="brand-name">BruchinDB</span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav-link active" href="../search-page/index.html">Search</a>
+        <a class="nav-link" href="../map-page/index.html">Map</a>
+        <a class="nav-link" href="../loading-page/index.html">Learn</a>
+        <a class="nav-link" href="../data-submission-page/index.html">Submit Data</a>
+        <a class="nav-link" href="../about-page/index.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="search-layout" id="searchLayout">
 
     <!-- LEFT FILTER PANEL -->
-    <aside class="filter-panel is-open" id="filterPanel">
+    <aside class="filter-panel" id="filterPanel">
 
       <div class="filter-header">
         <h2>Search</h2>
       </div>
 
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
+        <div class="filter-title" data-section-toggle>
           Scientific Name
           <span class="arrow">&#9662;</span>
         </div>
@@ -33,7 +50,7 @@
       </div>
 
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
+        <div class="filter-title" data-section-toggle>
           Tribe
           <span class="arrow">&#9662;</span>
         </div>
@@ -45,8 +62,8 @@
       </div>
 
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
-        Location
+        <div class="filter-title" data-section-toggle>
+          Location
           <span class="arrow">&#9662;</span>
         </div>
         <div class="filter-content">
@@ -69,7 +86,7 @@
       </div>
 
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
+        <div class="filter-title" data-section-toggle>
           Host Plant
           <span class="arrow">&#9662;</span>
         </div>
@@ -85,7 +102,7 @@
       </div>
 
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
+        <div class="filter-title" data-section-toggle>
           Image-Only Species
           <span class="arrow">&#9662;</span>
         </div>
@@ -111,8 +128,18 @@
     <main class="main-view">
 
       <div class="view-toolbar">
-        <button class="view-btn" id="filtersBtn" type="button">Filters</button>
-        <a class="view-btn secondary" href="../map-page/index.html">View Map</a>
+        <button type="button" class="view-btn" id="filtersToggleBtn">Filters</button>
+
+        <div class="sort-wrapper">
+          <label for="sortSelect" class="sort-label">Sort:</label>
+          <select id="sortSelect" class="sort-select">
+            <option value="az">Name (A-Z)</option>
+            <option value="za">Name (Z-A)</option>
+            <option value="newest">Year (Newest)</option>
+            <option value="oldest">Year (Oldest)</option>
+          </select>
+        </div>
+
         <span class="results-count" id="resultsCount"></span>
       </div>
 
@@ -129,50 +156,29 @@
 
   </div>
 
-  <script type="module" src="./search.js"></script>
-
   <script>
-    const pageShell = document.querySelector(".page-shell");
-    const filterPanel = document.getElementById("filterPanel");
-    const filtersBtn = document.getElementById("filtersBtn");
-
-    function setPanelState(open) {
-      if (open) {
-        pageShell.classList.remove("panel-closed");
-        pageShell.classList.add("panel-open");
-        filterPanel.classList.remove("is-closed");
-        filterPanel.classList.add("is-open");
-      } else {
-        pageShell.classList.remove("panel-open");
-        pageShell.classList.add("panel-closed");
-        filterPanel.classList.remove("is-open");
-        filterPanel.classList.add("is-closed");
-      }
-    }
-
-    const mainView = document.querySelector(".main-view");
-
-    function togglePanel() {
-      const isClosed = pageShell.classList.contains("panel-closed");
-      setPanelState(isClosed);
-      if (window.map) window.map.resize();
-    }
-
-    function toggleSection(element) {
-      const content = element.nextElementSibling;
-      const arrow = element.querySelector(".arrow");
-      if (!content || !arrow) return;
-      content.classList.toggle("open");
-      arrow.classList.toggle("rotate");
-    }
-
-    filtersBtn.addEventListener("click", togglePanel);
-    setPanelState(true);
-
-    mainView.addEventListener("transitionend", (e) => {
-      if (e.propertyName === "left" && window.map) window.map.resize();
+    // Section dropdown toggling (works for any element with data-section-toggle)
+    document.querySelectorAll('[data-section-toggle]').forEach((title) => {
+      title.addEventListener('click', () => {
+        const content = title.nextElementSibling;
+        const arrow = title.querySelector('.arrow');
+        if (!content || !arrow) return;
+        content.classList.toggle('open');
+        arrow.classList.toggle('rotate');
+      });
     });
+
+    // Filter panel collapse toggle
+    const filtersToggleBtn = document.getElementById('filtersToggleBtn');
+    const searchLayout = document.getElementById('searchLayout');
+    if (filtersToggleBtn && searchLayout) {
+      filtersToggleBtn.addEventListener('click', () => {
+        searchLayout.classList.toggle('filters-collapsed');
+      });
+    }
   </script>
+
+  <script type="module" src="./search.js"></script>
 
 </body>
 </html>
