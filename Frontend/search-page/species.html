@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Species | BruchinDB</title>
 
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -37,6 +39,9 @@
       </button>
       <button class="tab-btn" data-tab="events" aria-selected="false" role="tab">
         Events
+      </button>
+      <button class="tab-btn" data-tab="map" aria-selected="false" role="tab">
+        Map
       </button>
     </nav>
 
@@ -158,12 +163,11 @@
             <tr>
                 <th>Country</th>
                 <th>Province</th>
-                <th>County</th>
                 <th>Locality</th>
-                <th>Elevation (m)</th>
+                <th>Elevation</th>
+                <th>Coordinates</th>
                 <th>Date</th>
                 <th>Collector</th>
-                <th>Specimens</th>
             </tr>
             </thead>
 
@@ -196,8 +200,16 @@
     </div>
     </section>
 
+    <section class="tab-panel" id="map" role="tabpanel">
+      <div class="panel-card">
+        <h2 class="panel-title">Locality Map</h2>
+        <div id="species-map" style="width: 100%; height: 500px; border-radius: 8px;"></div>
+        <p id="map-empty" style="display:none; color:#666; padding:20px;">No coordinates available for this species.</p>
+      </div>
+    </section>
+
   </main>
 
-  <script src="./species.js"></script>
+  <script type="module" src="./species.js"></script>
 </body>
 </html>

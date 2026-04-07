@@ -20,63 +20,54 @@
         <h2>Search</h2>
       </div>
 
-      <!-- Scientific Name -->
       <div class="filter-section">
         <div class="filter-title" onclick="toggleSection(this)">
           Scientific Name
           <span class="arrow">&#9662;</span>
         </div>
         <div class="filter-content">
-          <input type="text" placeholder="Enter scientific name..." />
+          <input type="text" id="sci-name-search" placeholder="Type to search..." autocomplete="off" />
+          <div id="sci-name-suggestions" class="sci-name-suggestions"></div>
+          <div class="chip-list" id="selectedChips"></div>
         </div>
       </div>
 
-      <!-- Location -->
       <div class="filter-section">
         <div class="filter-title" onclick="toggleSection(this)">
-          Location
+          Tribe
           <span class="arrow">&#9662;</span>
         </div>
-
         <div class="filter-content">
-
-          <div class="location-group">
-            <input type="text" placeholder="Country..." />
-            <select>
-              <option value="">Select country</option>
-              <option>United States</option>
-              <option>Mexico</option>
-              <option>Brazil</option>
-            </select>
-          </div>
-
-          <div class="location-group">
-            <input type="text" placeholder="Province / State..." />
-            <select>
-              <option value="">Select province/state</option>
-              <option>California</option>
-              <option>Oregon</option>
-              <option>Texas</option>
-            </select>
-          </div>
-
-          <div class="location-group">
-            <input type="text" placeholder="County..." />
-            <select>
-              <option value="">Select county</option>
-              <option>San Diego County</option>
-              <option>Los Angeles County</option>
-            </select>
-          </div>
-
-          <div class="location-group">
-            <input type="number" placeholder="Minimum elevation (m)..." min="0" />
-          </div>
-
+          <select id="filter-tribe">
+            <option value="">Any tribe</option>
+          </select>
         </div>
       </div>
 
-      <!-- Host Plant -->
+      <div class="filter-section">
+        <div class="filter-title" onclick="toggleSection(this)">
+        Location
+          <span class="arrow">&#9662;</span>
+        </div>
+        <div class="filter-content">
+          <div class="location-group">
+            <input type="text" id="filter-country" placeholder="Country..." autocomplete="off" />
+            <div id="country-suggestions" class="autocomplete-suggestions"></div>
+            <div id="country-chips" class="chip-list"></div>
+          </div>
+          <div class="location-group">
+            <input type="text" id="province-input" placeholder="Province / State..." autocomplete="off" />
+            <div id="province-suggestions" class="autocomplete-suggestions"></div>
+            <div id="province-chips" class="chip-list"></div>
+          </div>
+          <div class="location-group">
+            <input type="text" id="locality-input" placeholder="Locality..." autocomplete="off" />
+            <div id="locality-suggestions" class="autocomplete-suggestions"></div>
+            <div id="locality-chips" class="chip-list"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="filter-section">
         <div class="filter-title" onclick="toggleSection(this)">
           Host Plant
@@ -93,7 +84,6 @@
         </div>
       </div>
 
-      <!-- Image-Only Species -->
       <div class="filter-section">
         <div class="filter-title" onclick="toggleSection(this)">
           Image-Only Species
@@ -103,27 +93,15 @@
           <label class="checkbox-label">
             <span class="checkbox-text">Show only species with images</span>
             <span class="checkbox-box">
-              <input type="checkbox" />
+              <input type="checkbox" id="filter-images-only" />
             </span>
           </label>
         </div>
       </div>
 
-      <!-- Higher Taxa -->
-      <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
-          Higher Taxa
-          <span class="arrow">&#9662;</span>
-        </div>
-        <div class="filter-content">
-          <select>
-            <option value="">Select rank</option>
-            <option>Subfamily</option>
-            <option>Tribe</option>
-            <option>Genus</option>
-          </select>
-          <input type="text" placeholder="Enter higher taxon..." />
-        </div>
+      <div class="filter-actions">
+        <button type="button" id="searchBtn" class="btn-primary">Search</button>
+        <button type="button" id="resetBtn" class="btn-secondary">Reset</button>
       </div>
 
     </aside>
@@ -135,89 +113,15 @@
       <div class="view-toolbar">
         <button class="view-btn" id="filtersBtn" type="button">Filters</button>
         <a class="view-btn secondary" href="../map-page/index.html">View Map</a>
+        <span class="results-count" id="resultsCount"></span>
       </div>
+
+      <!-- Banner shown when filtered from the map page -->
+      <div class="filter-banner" id="filterBanner" style="display:none;"></div>
 
       <div class="results-panel">
         <div class="cards-grid">
-
-          <article class="species-card">
-            <div class="species-info">
-              <h3>Bean Weevil</h3>
-              <p class="sci-name"><em>(Acanthoscelides obtectus)</em></p>
-              <a class="learn-more" href="./species.html">Learn More →</a>
-            </div>
-            <img
-              class="species-img"
-              src="./seed_beetle_logo_transparent.png"
-              alt="Seed beetle placeholder"
-            />
-          </article>
-
-          <article class="species-card">
-            <div class="species-info">
-              <h3>Pea Weevil</h3>
-              <p class="sci-name"><em>(Bruchus pisorum)</em></p>
-              <a class="learn-more" href="./species.html">Learn More →</a>
-            </div>
-            <img
-              class="species-img"
-              src="./seed_beetle_logo_transparent.png"
-              alt="Seed beetle placeholder"
-            />
-          </article>
-
-          <article class="species-card">
-            <div class="species-info">
-              <h3>Clover Seed Beetle</h3>
-              <p class="sci-name"><em>(Acanthoscelides pauperculus)</em></p>
-              <a class="learn-more" href="./species.html">Learn More →</a>
-            </div>
-            <img
-              class="species-img"
-              src="./seed_beetle_logo_transparent.png"
-              alt="Seed beetle placeholder"
-            />
-          </article>
-
-          <article class="species-card">
-            <div class="species-info">
-              <h3>Licorice Seed Beetle</h3>
-              <p class="sci-name"><em>(Acanthoscelides aureolus)</em></p>
-              <a class="learn-more" href="./species.html">Learn More →</a>
-            </div>
-            <img
-              class="species-img"
-              src="./seed_beetle_logo_transparent.png"
-              alt="Seed beetle placeholder"
-            />
-          </article>
-
-          <article class="species-card">
-            <div class="species-info">
-              <h3>Bean Weevil</h3>
-              <p class="sci-name"><em>(Acanthoscelides obtectus)</em></p>
-              <a class="learn-more" href="./species.html">Learn More →</a>
-            </div>
-            <img
-              class="species-img"
-              src="./seed_beetle_logo_transparent.png"
-              alt="Seed beetle placeholder"
-            />
-          </article>
-
-          <article class="species-card">
-            <div class="species-info">
-              <h3>Pea Weevil</h3>
-              <p class="sci-name"><em>(Bruchus rufimanus)</em></p>
-              <a class="learn-more" href="./species.html">Learn More →</a>
-            </div>
-            <img
-              class="species-img"
-              src="./seed_beetle_logo_transparent.png"
-              alt="Seed beetle placeholder"
-            />
-          </article>
-
+          <!-- Cards rendered by search.js -->
         </div>
       </div>
 
@@ -225,7 +129,7 @@
 
   </div>
 
-  <script src="./search.js"></script>
+  <script type="module" src="./search.js"></script>
 
   <script>
     const pageShell = document.querySelector(".page-shell");
@@ -251,10 +155,7 @@
     function togglePanel() {
       const isClosed = pageShell.classList.contains("panel-closed");
       setPanelState(isClosed);
-
-      if (window.map) {
-        window.map.resize();
-      }
+      if (window.map) window.map.resize();
     }
 
     function toggleSection(element) {
@@ -266,13 +167,10 @@
     }
 
     filtersBtn.addEventListener("click", togglePanel);
-
     setPanelState(true);
 
     mainView.addEventListener("transitionend", (e) => {
-      if (e.propertyName === "left" && window.map) {
-        window.map.resize();
-      }
+      if (e.propertyName === "left" && window.map) window.map.resize();
     });
   </script>
 

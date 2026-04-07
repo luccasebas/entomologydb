@@ -147,7 +147,7 @@
   </div>
 
   <script src="https://unpkg.com/maplibre-gl@3.2.1/dist/maplibre-gl.js"></script>
-  <script src="./map.js"></script>
+  <script type="module" src="./map.js"></script>
 
   <script>
     const pageShell = document.querySelector(".page-shell");
@@ -173,10 +173,7 @@
     function togglePanel() {
       const isClosed = pageShell.classList.contains("panel-closed");
       setPanelState(isClosed);
-
-      if (window.map) {
-        window.map.resize();
-      }
+      if (window.map) window.map.resize();
     }
 
     function toggleSection(element) {
@@ -192,9 +189,7 @@
     setPanelState(true);
 
     mainView.addEventListener("transitionend", (e) => {
-      if (e.propertyName === "left" && window.map) {
-        window.map.resize();
-      }
+      if (e.propertyName === "left" && window.map) window.map.resize();
     });
   </script>
 
