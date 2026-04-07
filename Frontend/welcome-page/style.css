@@ -1,0 +1,405 @@
+:root{
+  --bg:#ffffff;
+  --ink:#111111;
+  --muted:#2a2a2a;
+  --bar:#7789AD;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+/* TOP BAR */
+.topbar{
+  height:76px;
+  background:var(--bar);
+  display:flex;
+  align-items:center;
+}
+
+.topbar-inner{
+  width:100%;
+  padding:0 34px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color:#fff;
+}
+
+.brand-logo{
+  width:34px;
+  height:34px;
+  display:block;
+}
+
+.brand-name{
+  font-weight:800;
+  font-size:26px;
+}
+
+/* NAV LINKS */
+.nav{
+  display:flex;
+  align-items:center;
+  gap:58px;
+}
+
+.nav-link{
+  color:rgba(255,255,255,0.92);
+  text-decoration:none;
+  font-weight:700;
+  font-size:24px;
+}
+
+.nav-link:hover{ opacity:0.9; }
+
+.nav-link.active{
+  color:#fff;
+  position:relative;
+}
+
+.nav-link.active::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-10px;
+  height:3px;
+  background:rgba(255,255,255,0.85);
+  border-radius:999px;
+}
+
+/* PAGE CONTENT */
+.page{ min-height:calc(100vh - 76px); }
+
+.content{
+  padding:92px 0 0 110px;
+  max-width:900px;
+}
+
+h1{
+  margin:0 0 34px 0;
+  font-size:72px;
+  font-weight:900;
+  letter-spacing:-1px;
+}
+
+.about-text{
+  margin:0;
+  font-size:20px;
+  line-height:1.7;
+  color:var(--muted);
+  max-width:760px;
+}
+
+@media (max-width:980px){
+  .nav{ gap:26px; }
+  .nav-link{ font-size:18px; }
+  h1{ font-size:52px; }
+  .content{ padding:64px 18px 0 18px; }
+}
+
+/* =========================
+   WELCOME / LOGIN LANDING
+   ========================= */
+
+.welcome-body{
+  overflow:hidden;
+}
+
+.welcome-page{
+  position:relative;
+  min-height:calc(100vh - 76px);
+  background:#ffffff;
+  isolation:isolate;
+}
+
+/* MOVING MOSAIC */
+.beetle-mosaic{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-evenly;
+  gap:22px;
+  padding:28px 0;
+  overflow:hidden;
+  z-index:0;
+}
+
+.mosaic-row{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  width:max-content;
+  will-change:transform;
+}
+
+.row-left{
+  animation:mosaicScrollLeft 45s linear infinite;
+}
+
+.row-right{
+  animation:mosaicScrollRight 50s linear infinite;
+}
+
+.mosaic-card{
+  flex:0 0 auto;
+  background:#e8edf6;
+  border:3px solid rgba(255,255,255,0.95);
+  border-radius:6px;
+  overflow:hidden;
+  box-shadow:0 10px 28px rgba(17,17,17,0.08);
+}
+
+.mosaic-card img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  filter:saturate(1.02) contrast(1.02);
+}
+
+/* varied tile sizes to make it feel designed, not just a flat strip */
+.tile-wide{
+  width:270px;
+  height:150px;
+}
+
+.tile-tall{
+  width:120px;
+  height:150px;
+}
+
+.tile-medium{
+  width:170px;
+  height:150px;
+}
+
+.tile-small{
+  width:210px;
+  height:150px;
+}
+
+@keyframes mosaicScrollLeft{
+  0%   { transform:translateX(0); }
+  100% { transform:translateX(-50%); }
+}
+
+@keyframes mosaicScrollRight{
+  0%   { transform:translateX(-50%); }
+  100% { transform:translateX(0); }
+}
+
+/* SOFT WHITE WASH OVER IMAGES */
+.welcome-overlay{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.12) 0%,
+      rgba(255,255,255,0.22) 18%,
+      rgba(255,255,255,0.56) 42%,
+      rgba(255,255,255,0.72) 58%,
+      rgba(255,255,255,0.88) 100%
+    );
+  pointer-events:none;
+}
+
+/* HERO */
+.welcome-hero{
+  position:relative;
+  z-index:2;
+  min-height:calc(100vh - 76px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:32px;
+}
+
+.hero-mark{
+  display:flex;
+  align-items:center;
+  gap:36px;
+}
+
+.hero-logo{
+  width:260px;
+  height:auto;
+  object-fit:contain;
+  display:block;
+}
+
+.hero-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+
+.welcome-title{
+  margin:0;
+  font-size:72px;
+  line-height:0.95;
+  font-weight:900;
+  letter-spacing:-2px;
+}
+
+.welcome-subtitle{
+  margin:8px 0 20px 0;
+  font-size:18px;
+  text-transform:uppercase;
+  letter-spacing:1.1px;
+  color:#5b5b5b;
+}
+
+.welcome-actions{
+  display:flex;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.welcome-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:126px;
+  height:48px;
+  padding:0 22px;
+  border-radius:0;
+  text-decoration:none;
+  font-weight:800;
+  font-size:24px;
+  transition:transform 160ms ease, opacity 160ms ease, background 160ms ease;
+}
+
+.welcome-btn:hover{
+  transform:translateY(-1px);
+}
+
+.welcome-btn-solid{
+  background:var(--bar);
+  color:#fff;
+  border:3px solid var(--bar);
+}
+
+.welcome-btn-outline{
+  background:transparent;
+  color:var(--bar);
+  border:3px solid var(--bar);
+}
+
+.guest-link{
+  color:#3f4f71;
+  text-decoration:none;
+  font-weight:700;
+  font-size:18px;
+}
+
+.guest-link:hover{
+  text-decoration:underline;
+}
+
+/* RESPONSIVE */
+@media (max-width:1200px){
+  .welcome-title{
+    font-size:72px;
+  }
+
+  .hero-logo{
+    width:68px;
+    height:68px;
+  }
+}
+
+@media (max-width:980px){
+  .welcome-hero{
+    padding:40px 24px;
+  }
+
+  .hero-mark{
+    flex-direction:column;
+    text-align:center;
+    gap:22px;
+  }
+
+  .hero-copy{
+    align-items:center;
+  }
+
+  .welcome-title{
+    font-size:58px;
+  }
+
+  .welcome-subtitle{
+    font-size:15px;
+    margin-bottom:22px;
+  }
+
+  .welcome-actions{
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+
+  .welcome-btn{
+    min-width:auto;  
+    height:32px;       
+    padding:0 12px;     
+    font-size:13px;    
+    font-weight:600;
+    border-radius:6px;
+  }
+
+  .tile-wide,
+  .tile-tall,
+  .tile-medium,
+  .tile-small{
+    width:180px;
+    height:120px;
+  }
+}
+
+@media (max-width:640px){
+  .welcome-title{
+    font-size:44px;
+  }
+
+  .hero-logo{
+    width:80px;
+    height:80px;
+    object-fit:contain;
+    display:block;
+  }
+
+  .guest-link{
+    font-size:16px;
+  }
+
+  .tile-wide,
+  .tile-tall,
+  .tile-medium,
+  .tile-small{
+    width:150px;
+    height:100px;
+  }
+}
+
+.hero-logo-wrapper{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}

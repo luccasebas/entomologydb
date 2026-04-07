@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Welcome | BruchinDB</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body class="welcome-body">
+
+  <!-- Top Nav Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#">
+        <img
+          src="./icons/bruchindb-logo.png"
+          alt="BruchinDB logo"
+          class="brand-logo"
+        />
+        <span class="brand-name">BruchinDB</span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav-link" href="#">Search</a>
+        <a class="nav-link" href="#">Map</a>
+        <a class="nav-link" href="#">Learn</a>
+        <a class="nav-link" href="#">Submit Data</a>
+        <a class="nav-link" href="#">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="welcome-page">
+
+    <!-- Moving image mosaic background -->
+    <section class="beetle-mosaic" aria-hidden="true">
+      <div class="mosaic-row row-left" id="row-1"></div>
+      <div class="mosaic-row row-right" id="row-2"></div>
+      <div class="mosaic-row row-left" id="row-3"></div>
+      <div class="mosaic-row row-right" id="row-4"></div>
+    </section>
+
+    <!-- Soft overlay -->
+    <div class="welcome-overlay"></div>
+
+    <!-- Center hero content -->
+    <section class="welcome-hero">
+      <div class="hero-mark">
+
+        <div class="hero-logo-wrapper">
+        <img src="./icons/white_beetle.png" alt="BruchinDB logo" class="hero-logo">
+        </div>
+
+        <div class="hero-copy">
+          <h1 class="welcome-title">BruchinDB</h1>
+          <p class="welcome-subtitle">Sharing seed beetle data globally</p>
+
+          <div class="welcome-actions">
+            <a href="#" class="welcome-btn welcome-btn-solid">Login</a>
+            <a href="#" class="welcome-btn welcome-btn-outline">Sign Up</a>
+          </div>
+
+          <a href="#" class="guest-link">Continue as guest</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /*
+      Replace these with image paths from Dr. Morse's database export.
+      Example:
+      "./images/morse/acanthoscelides-obtectus-1.jpg"
+    */
+    const beetleImages = [
+      "./images/beetle1.jpg",
+      "./images/beetle2.jpg",
+      "./images/beetle3.jpg",
+      "./images/beetle4.jpg",
+      "./images/beetle5.jpg",
+      "./images/beetle6.jpg",
+      "./images/beetle7.jpg",
+      "./images/beetle8.jpg",
+      "./images/beetle9.jpg",
+      "./images/beetle10.jpg"
+    ];
+
+    function buildRow(rowId) {
+      const row = document.getElementById(rowId);
+
+      // Duplicate image set so animation loops more smoothly
+      const doubled = [...beetleImages, ...beetleImages];
+
+      doubled.forEach((src, index) => {
+        const card = document.createElement("div");
+        card.className = "mosaic-card";
+
+        // create varied sizes / rhythm
+        const sizeClasses = ["tile-wide", "tile-tall", "tile-medium", "tile-small"];
+        card.classList.add(sizeClasses[index % sizeClasses.length]);
+
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "";
+        img.loading = "lazy";
+
+        card.appendChild(img);
+        row.appendChild(card);
+      });
+    }
+
+    buildRow("row-1");
+    buildRow("row-2");
+    buildRow("row-3");
+    buildRow("row-4");
+  </script>
+
+</body>
+</html>
