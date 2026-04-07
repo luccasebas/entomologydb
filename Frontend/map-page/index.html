@@ -15,6 +15,28 @@
 
 <body>
 
+  <!-- Top Nav Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#">
+        <img
+          src="./icons/bruchindb-logo.png"
+          alt="BruchinDB logo"
+          class="brand-logo"
+        />
+        <span class="brand-name">BruchinDB</span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav-link" href="#">Search</a>
+        <a class="nav-link active" href="#">Map</a>
+        <a class="nav-link" href="#">Learn</a>
+        <a class="nav-link" href="#">Submit Data</a>
+        <a class="nav-link" href="#">About</a>
+      </nav>
+    </div>
+  </header>
+
   <div class="search-layout">
 
     <!-- LEFT FILTER PANEL -->
@@ -44,7 +66,6 @@
 
         <div class="filter-content">
 
-          <!-- Country -->
           <div class="location-group">
             <input type="text" placeholder="Country..." />
             <select>
@@ -55,7 +76,6 @@
             </select>
           </div>
 
-          <!-- Province / State -->
           <div class="location-group">
             <input type="text" placeholder="Province / State..." />
             <select>
@@ -66,7 +86,6 @@
             </select>
           </div>
 
-          <!-- County -->
           <div class="location-group">
             <input type="text" placeholder="County..." />
             <select>
@@ -76,7 +95,6 @@
             </select>
           </div>
 
-          <!-- Minimum Elevation -->
           <div class="location-group">
             <input type="number" placeholder="Minimum elevation (m)..." min="0" />
           </div>
