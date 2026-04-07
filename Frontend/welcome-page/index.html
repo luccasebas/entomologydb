@@ -69,35 +69,158 @@
   </main>
 
   <script>
-    /*
-      Replace these with image paths from Dr. Morse's database export.
-      Example:
-      "./images/morse/acanthoscelides-obtectus-1.jpg"
-    */
     const beetleImages = [
-      "./images/beetle1.jpg",
-      "./images/beetle2.jpg",
-      "./images/beetle3.jpg",
-      "./images/beetle4.jpg",
-      "./images/beetle5.jpg",
-      "./images/beetle6.jpg",
-      "./images/beetle7.jpg",
-      "./images/beetle8.jpg",
-      "./images/beetle9.jpg",
-      "./images/beetle10.jpg"
+      "./WelcomePageImages/species001.png",
+      "./WelcomePageImages/species002.png",
+      "./WelcomePageImages/species003.png",
+      "./WelcomePageImages/species004.png",
+      "./WelcomePageImages/species005.png",
+      "./WelcomePageImages/species006.png",
+      "./WelcomePageImages/species007.png",
+      "./WelcomePageImages/species008.png",
+      "./WelcomePageImages/species009.png",
+      "./WelcomePageImages/species010.png",
+      "./WelcomePageImages/species011.png",
+      "./WelcomePageImages/species012.png",
+      "./WelcomePageImages/species013.png",
+      "./WelcomePageImages/species014.png",
+      "./WelcomePageImages/species015.png",
+      "./WelcomePageImages/species016.png",
+      "./WelcomePageImages/species017.png",
+      "./WelcomePageImages/species018.png",
+      "./WelcomePageImages/species019.png",
+      "./WelcomePageImages/species020.png",
+      "./WelcomePageImages/species021.png",
+      "./WelcomePageImages/species022.png",
+      "./WelcomePageImages/species023.png",
+      "./WelcomePageImages/species024.png",
+      "./WelcomePageImages/species025.png",
+      "./WelcomePageImages/species026.png",
+      "./WelcomePageImages/species027.png",
+      "./WelcomePageImages/species028.png",
+      "./WelcomePageImages/species029.png",
+      "./WelcomePageImages/species030.png",
+      "./WelcomePageImages/species031.png",
+      "./WelcomePageImages/species032.png",
+      "./WelcomePageImages/species033.png",
+      "./WelcomePageImages/species034.png",
+      "./WelcomePageImages/species035.png",
+      "./WelcomePageImages/species036.png",
+      "./WelcomePageImages/species037.png",
+      "./WelcomePageImages/species038.png",
+      "./WelcomePageImages/species039.png",
+      "./WelcomePageImages/species040.png",
+      "./WelcomePageImages/species041.png",
+      "./WelcomePageImages/species042.png",
+      "./WelcomePageImages/species043.png",
+      "./WelcomePageImages/species044.png",
+      "./WelcomePageImages/species045.png",
+      "./WelcomePageImages/species046.png",
+      "./WelcomePageImages/species047.png",
+      "./WelcomePageImages/species048.png",
+      "./WelcomePageImages/species049.png",
+      "./WelcomePageImages/species050.png",
+      "./WelcomePageImages/species051.png",
+      "./WelcomePageImages/species052.png",
+      "./WelcomePageImages/species053.png",
+      "./WelcomePageImages/species054.png",
+      "./WelcomePageImages/species055.png",
+      "./WelcomePageImages/species056.png",
+      "./WelcomePageImages/species057.png",
+      "./WelcomePageImages/species058.png",
+      "./WelcomePageImages/species059.png",
+      "./WelcomePageImages/species060.png",
+      "./WelcomePageImages/species061.png",
+      "./WelcomePageImages/species062.png",
+      "./WelcomePageImages/species063.png",
+      "./WelcomePageImages/species064.png",
+      "./WelcomePageImages/species065.png",
+      "./WelcomePageImages/species066.png",
+      "./WelcomePageImages/species067.png",
+      "./WelcomePageImages/species068.png",
+      "./WelcomePageImages/species069.png",
+      "./WelcomePageImages/species070.png",
+      "./WelcomePageImages/species071.png",
+      "./WelcomePageImages/species072.png",
+      "./WelcomePageImages/species073.png",
+      "./WelcomePageImages/species074.png",
+      "./WelcomePageImages/species075.png",
+      "./WelcomePageImages/species076.png",
+      "./WelcomePageImages/species077.png",
+      "./WelcomePageImages/species078.png",
+      "./WelcomePageImages/species079.png",
+      "./WelcomePageImages/species080.png",
+      "./WelcomePageImages/species081.png",
+      "./WelcomePageImages/species082.png",
+      "./WelcomePageImages/species083.png",
+      "./WelcomePageImages/species084.png",
+      "./WelcomePageImages/species085.png",
+      "./WelcomePageImages/species086.png",
+      "./WelcomePageImages/species087.png",
+      "./WelcomePageImages/species088.png",
+      "./WelcomePageImages/species089.png",
+      "./WelcomePageImages/species090.png",
+      "./WelcomePageImages/species091.png",
+      "./WelcomePageImages/species092.png",
+      "./WelcomePageImages/species093.png",
+      "./WelcomePageImages/species094.png",
+      "./WelcomePageImages/species095.png",
+      "./WelcomePageImages/species096.png",
+      "./WelcomePageImages/species097.png",
+      "./WelcomePageImages/species098.png",
+      "./WelcomePageImages/species099.png",
+      "./WelcomePageImages/species100.png",
+      "./WelcomePageImages/species101.png",
+      "./WelcomePageImages/species102.png",
+      "./WelcomePageImages/species103.png",
+      "./WelcomePageImages/species104.png",
+      "./WelcomePageImages/species105.png",
+      "./WelcomePageImages/species106.png",
+      "./WelcomePageImages/species107.png",
+      "./WelcomePageImages/species108.png",
+      "./WelcomePageImages/species109.png",
+      "./WelcomePageImages/species110.png",
+      "./WelcomePageImages/species111.png",
+      "./WelcomePageImages/species112.png",
+      "./WelcomePageImages/species113.png",
+      "./WelcomePageImages/species114.png",
+      "./WelcomePageImages/species115.png",
     ];
+
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function makeMixedSequence(images, repeatCount = 2) {
+      const result = [];
+
+      for (let r = 0; r < repeatCount; r++) {
+        let shuffled = shuffleArray(images);
+
+        if (result.length > 0 && shuffled[0] === result[result.length - 1]) {
+          shuffled.push(shuffled.shift());
+        }
+
+        result.push(...shuffled);
+      }
+
+      return result;
+    }
 
     function buildRow(rowId) {
       const row = document.getElementById(rowId);
 
-      // Duplicate image set so animation loops more smoothly
-      const doubled = [...beetleImages, ...beetleImages];
+      const mixedImages = makeMixedSequence(beetleImages, 2);
 
-      doubled.forEach((src, index) => {
+      mixedImages.forEach((src, index) => {
         const card = document.createElement("div");
         card.className = "mosaic-card";
 
-        // create varied sizes / rhythm
         const sizeClasses = ["tile-wide", "tile-tall", "tile-medium", "tile-small"];
         card.classList.add(sizeClasses[index % sizeClasses.length]);
 

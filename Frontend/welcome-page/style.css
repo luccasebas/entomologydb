@@ -148,12 +148,20 @@ h1{
   will-change:transform;
 }
 
-.row-left{
-  animation:mosaicScrollLeft 45s linear infinite;
+#row-1{
+  animation:mosaicScrollLeft 95s linear infinite;
 }
 
-.row-right{
-  animation:mosaicScrollRight 50s linear infinite;
+#row-2{
+  animation:mosaicScrollRight 110s linear infinite;
+}
+
+#row-3{
+  animation:mosaicScrollLeft 85s linear infinite;
+}
+
+#row-4{
+  animation:mosaicScrollRight 105s linear infinite;
 }
 
 .mosaic-card{
