@@ -45,7 +45,7 @@
     }
   },
   "sprite": "https://maps.geo.eu-west-1.amazonaws.com/v2/styles/3_1_0/Hybrid/Light/Default/sprites/sprites",
-  "glyphs": "https://maps.geo.eu-west-1.amazonaws.com/v2/glyphs/{fontstack}/{range}.pbf",
+  "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "land",

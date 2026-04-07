@@ -1,184 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Map | BruchinDB</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Map | BruchinDB</title>
 
-
- <link
-   rel="stylesheet"
-   href="https://unpkg.com/maplibre-gl@3.2.1/dist/maplibre-gl.css"
- />
-
-
- <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.2.1/dist/maplibre-gl.css" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
 
- <!-- Top Nav Bar -->
- <header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="../search-page/index.html">
-      <img src="./icons/bruchindb-logo.png" alt="BruchinDB logo" class="brand-logo" />
-      <span class="brand-name">BruchinDB</span>
-    </a>
+  <!-- Top Nav Bar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../search-page/index.html">
+        <img src="./icons/bruchindb-logo.png" alt="BruchinDB logo" class="brand-logo" />
+        <span class="brand-name">BruchinDB</span>
+      </a>
 
-    <nav class="nav" aria-label="Primary">
-      <a class="nav-link" href="../search-page/index.html">Search</a>
-      <a class="nav-link active" href="../map-page/index.html">Map</a>
-      <a class="nav-link" href="../loading-page/index.html">Learn</a>
-      <a class="nav-link" href="../data-submission-page/index.html">Submit Data</a>
-      <a class="nav-link" href="../about-page/index.html">About</a>
-    </nav>
+      <nav class="nav" aria-label="Primary">
+        <a class="nav-link" href="../search-page/index.html">Search</a>
+        <a class="nav-link active" href="../map-page/index.html">Map</a>
+        <a class="nav-link" href="../loading-page/index.html">Learn</a>
+        <a class="nav-link" href="../data-submission-page/index.html">Submit Data</a>
+        <a class="nav-link" href="../about-page/index.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="search-layout" id="searchLayout">
+
+    <!-- LEFT FILTER PANEL -->
+    <aside class="filter-panel" id="filterPanel">
+
+      <div class="filter-header">
+        <h2>Search</h2>
+      </div>
+
+      <!-- Scientific Name -->
+      <div class="filter-section">
+        <div class="filter-title" data-section-toggle>
+          Scientific Name
+          <span class="arrow">&#9662;</span>
+        </div>
+        <div class="filter-content">
+          <input type="text" placeholder="Enter scientific name..." />
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="filter-section">
+        <div class="filter-title" data-section-toggle>
+          Location
+          <span class="arrow">&#9662;</span>
+        </div>
+        <div class="filter-content">
+          <div class="location-group">
+            <input type="text" placeholder="Country..." />
+          </div>
+          <div class="location-group">
+            <input type="text" placeholder="Province / State..." />
+          </div>
+          <div class="location-group">
+            <input type="text" placeholder="County..." />
+          </div>
+          <div class="location-group">
+            <input type="number" placeholder="Minimum elevation (m)..." min="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Host Plant -->
+      <div class="filter-section">
+        <div class="filter-title" data-section-toggle>
+          Host Plant
+          <span class="arrow">&#9662;</span>
+        </div>
+        <div class="filter-content">
+          <input type="text" placeholder="Enter host plant..." />
+          <select>
+            <option value="">Select family</option>
+            <option>Fabaceae</option>
+            <option>Poaceae</option>
+            <option>Asteraceae</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Image-Only Species -->
+      <div class="filter-section">
+        <div class="filter-title" data-section-toggle>
+          Image-Only Species
+          <span class="arrow">&#9662;</span>
+        </div>
+        <div class="filter-content">
+          <label class="checkbox-label">
+            <span class="checkbox-text">Show only species with images</span>
+            <span class="checkbox-box">
+              <input type="checkbox" />
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Higher Taxa -->
+      <div class="filter-section">
+        <div class="filter-title" data-section-toggle>
+          Higher Taxa
+          <span class="arrow">&#9662;</span>
+        </div>
+        <div class="filter-content">
+          <select>
+            <option value="">Select rank</option>
+            <option>Subfamily</option>
+            <option>Tribe</option>
+            <option>Genus</option>
+          </select>
+          <input type="text" placeholder="Enter higher taxon..." />
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAP PANEL -->
+    <main class="results-panel">
+      <div id="map"></div>
+    </main>
+
   </div>
-</header>
 
- <div class="search-layout">
+  <script>
+    document.querySelectorAll('[data-section-toggle]').forEach((title) => {
+      title.addEventListener('click', () => {
+        const content = title.nextElementSibling;
+        const arrow = title.querySelector('.arrow');
+        if (!content || !arrow) return;
+        content.classList.toggle('open');
+        arrow.classList.toggle('rotate');
+      });
+    });
+  </script>
 
-
-   <!-- LEFT FILTER PANEL -->
-   <aside class="filter-panel">
-
-
-     <div class="filter-header">
-       <h2>Search</h2>
-     </div>
-
-
-     <!-- Scientific Name -->
-     <div class="filter-section">
-       <div class="filter-title" onclick="toggleSection(this)">
-         Scientific Name
-         <span class="arrow">&#9662;</span>
-       </div>
-       <div class="filter-content">
-         <input type="text" placeholder="Enter scientific name..." />
-       </div>
-     </div>
-
-
-     <!-- Location -->
-     <div class="filter-section">
-       <div class="filter-title" onclick="toggleSection(this)">
-         Location
-         <span class="arrow">&#9662;</span>
-       </div>
-
-
-       <div class="filter-content">
-
-
-         <div class="location-group">
-           <input type="text" placeholder="Country..." />
-           <select>
-             <option value="">Select country</option>
-             <option>United States</option>
-             <option>Mexico</option>
-             <option>Brazil</option>
-           </select>
-         </div>
-
-
-         <div class="location-group">
-           <input type="text" placeholder="Province / State..." />
-           <select>
-             <option value="">Select province/state</option>
-             <option>California</option>
-             <option>Oregon</option>
-             <option>Texas</option>
-           </select>
-         </div>
-
-
-         <div class="location-group">
-           <input type="text" placeholder="County..." />
-           <select>
-             <option value="">Select county</option>
-             <option>San Diego County</option>
-             <option>Los Angeles County</option>
-           </select>
-         </div>
-
-
-         <div class="location-group">
-           <input type="number" placeholder="Minimum elevation (m)..." min="0" />
-         </div>
-
-
-       </div>
-     </div>
-
-
-     <!-- Host Plant -->
-     <div class="filter-section">
-       <div class="filter-title" onclick="toggleSection(this)">
-         Host Plant
-         <span class="arrow">&#9662;</span>
-       </div>
-       <div class="filter-content">
-         <input type="text" placeholder="Enter host plant..." />
-         <select>
-           <option value="">Select family</option>
-           <option>Fabaceae</option>
-           <option>Poaceae</option>
-           <option>Asteraceae</option>
-         </select>
-       </div>
-     </div>
-
-
-     <!-- Image-Only Species -->
-     <div class="filter-section">
-       <div class="filter-title" onclick="toggleSection(this)">
-         Image-Only Species
-         <span class="arrow">&#9662;</span>
-       </div>
-       <div class="filter-content">
-         <label class="checkbox-label">
-           <span class="checkbox-text">Show only species with images</span>
-           <span class="checkbox-box">
-             <input type="checkbox" />
-           </span>
-         </label>
-       </div>
-     </div>
-
-
-     <!-- Higher Taxa -->
-     <div class="filter-section">
-       <div class="filter-title" onclick="toggleSection(this)">
-         Higher Taxa
-         <span class="arrow">&#9662;</span>
-       </div>
-       <div class="filter-content">
-         <select>
-           <option value="">Select rank</option>
-           <option>Subfamily</option>
-           <option>Tribe</option>
-           <option>Genus</option>
-         </select>
-         <input type="text" placeholder="Enter higher taxon..." />
-       </div>
-     </div>
-
-
-   </aside>
-
-
-   <!-- MAP PANEL -->
-   <main class="results-panel">
-     <div id="map"></div>
-   </main>
-
-
- </div>
-
-
- <script src="https://unpkg.com/maplibre-gl@3.2.1/dist/maplibre-gl.js"></script>
- <script src="./map.js"></script>
-
+  <script src="https://unpkg.com/maplibre-gl@3.2.1/dist/maplibre-gl.js"></script>
+  <script type="module" src="./map.js"></script>
 
 </body>
 </html>

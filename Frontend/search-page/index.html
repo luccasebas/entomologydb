@@ -28,78 +28,65 @@
     </div>
   </header>
 
-  <div class="search-layout">
+  <div class="search-layout" id="searchLayout">
 
     <!-- LEFT FILTER PANEL -->
-    <aside class="filter-panel">
+    <aside class="filter-panel" id="filterPanel">
 
       <div class="filter-header">
         <h2>Search</h2>
       </div>
 
-      <!-- Scientific Name -->
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
+        <div class="filter-title" data-section-toggle>
           Scientific Name
           <span class="arrow">&#9662;</span>
         </div>
         <div class="filter-content">
-          <input type="text" placeholder="Enter scientific name..." />
+          <input type="text" id="sci-name-search" placeholder="Type to search..." autocomplete="off" />
+          <div id="sci-name-suggestions" class="sci-name-suggestions"></div>
+          <div class="chip-list" id="selectedChips"></div>
         </div>
       </div>
 
-      <!-- Location -->
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
+        <div class="filter-title" data-section-toggle>
+          Tribe
+          <span class="arrow">&#9662;</span>
+        </div>
+        <div class="filter-content">
+          <select id="filter-tribe">
+            <option value="">Any tribe</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-title" data-section-toggle>
           Location
           <span class="arrow">&#9662;</span>
         </div>
-
         <div class="filter-content">
-
-          <!-- Country -->
           <div class="location-group">
-            <input type="text" placeholder="Country..." />
-            <select>
-              <option value="">Select country</option>
-              <option>United States</option>
-              <option>Mexico</option>
-              <option>Brazil</option>
-            </select>
+            <input type="text" id="filter-country" placeholder="Country..." autocomplete="off" />
+            <div id="country-suggestions" class="autocomplete-suggestions"></div>
+            <div id="country-chips" class="chip-list"></div>
           </div>
-
-          <!-- Province / State -->
           <div class="location-group">
-            <input type="text" placeholder="Province / State..." />
-            <select>
-              <option value="">Select province/state</option>
-              <option>California</option>
-              <option>Oregon</option>
-              <option>Texas</option>
-            </select>
+            <input type="text" id="province-input" placeholder="Province / State..." autocomplete="off" />
+            <div id="province-suggestions" class="autocomplete-suggestions"></div>
+            <div id="province-chips" class="chip-list"></div>
           </div>
-
-          <!-- County -->
           <div class="location-group">
-            <input type="text" placeholder="County..." />
-            <select>
-              <option value="">Select county</option>
-              <option>San Diego County</option>
-              <option>Los Angeles County</option>
-            </select>
+            <input type="text" id="locality-input" placeholder="Locality..." autocomplete="off" />
+            <div id="locality-suggestions" class="autocomplete-suggestions"></div>
+            <div id="locality-chips" class="chip-list"></div>
           </div>
-
-          <!-- Minimum Elevation -->
-          <div class="location-group">
-            <input type="number" placeholder="Minimum elevation (m)..." min="0" />
-          </div>
-
         </div>
       </div>
 
-      <!-- Host Plant -->
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
+        <div class="filter-title" data-section-toggle>
           Host Plant
           <span class="arrow">&#9662;</span>
         </div>
@@ -114,9 +101,8 @@
         </div>
       </div>
 
-      <!-- Image-Only Species -->
       <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
+        <div class="filter-title" data-section-toggle>
           Image-Only Species
           <span class="arrow">&#9662;</span>
         </div>
@@ -124,120 +110,75 @@
           <label class="checkbox-label">
             <span class="checkbox-text">Show only species with images</span>
             <span class="checkbox-box">
-              <input type="checkbox" />
+              <input type="checkbox" id="filter-images-only" />
             </span>
           </label>
         </div>
       </div>
 
-      <!-- Higher Taxa -->
-      <div class="filter-section">
-        <div class="filter-title" onclick="toggleSection(this)">
-          Higher Taxa
-          <span class="arrow">&#9662;</span>
-        </div>
-        <div class="filter-content">
-          <select>
-            <option value="">Select rank</option>
-            <option>Subfamily</option>
-            <option>Tribe</option>
-            <option>Genus</option>
-          </select>
-          <input type="text" placeholder="Enter higher taxon..." />
-        </div>
+      <div class="filter-actions">
+        <button type="button" id="searchBtn" class="btn-primary">Search</button>
+        <button type="button" id="resetBtn" class="btn-secondary">Reset</button>
       </div>
 
     </aside>
 
-    <!-- RESULTS PANEL -->
-    <main class="results-panel">
 
-      <div class="cards-grid">
+    <!-- MAIN VIEW -->
+    <main class="main-view">
 
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Bean Weevil</h3>
-            <p class="sci-name"><em>(Acanthoscelides obtectus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
+      <div class="view-toolbar">
+        <button type="button" class="view-btn" id="filtersToggleBtn">Filters</button>
 
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Pea Weevil</h3>
-            <p class="sci-name"><em>(Bruchus pisorum)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
+        <div class="sort-wrapper">
+          <label for="sortSelect" class="sort-label">Sort:</label>
+          <select id="sortSelect" class="sort-select">
+            <option value="az">Name (A-Z)</option>
+            <option value="za">Name (Z-A)</option>
+            <option value="newest">Year (Newest)</option>
+            <option value="oldest">Year (Oldest)</option>
+          </select>
+        </div>
 
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Clover Seed Beetle</h3>
-            <p class="sci-name"><em>(Acanthoscelides pauperculus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Licorice Seed Beetle</h3>
-            <p class="sci-name"><em>(Acanthoscelides aureolus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Bean Weevil</h3>
-            <p class="sci-name"><em>(Acanthoscelides obtectus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
-        <article class="species-card">
-          <div class="species-info">
-            <h3>Pea Weevil</h3>
-            <p class="sci-name"><em>(Bruchus rufimanus)</em></p>
-            <a class="learn-more" href="./species.html">Learn More →</a>
-          </div>
-          <img
-            class="species-img"
-            src="./seed_beetle_logo_transparent.png"
-            alt="Seed beetle placeholder"
-          />
-        </article>
-
+        <span class="results-count" id="resultsCount"></span>
       </div>
+
+      <!-- Banner shown when filtered from the map page -->
+      <div class="filter-banner" id="filterBanner" style="display:none;"></div>
+
+      <div class="results-panel">
+        <div class="cards-grid">
+          <!-- Cards rendered by search.js -->
+        </div>
+      </div>
+
     </main>
 
   </div>
 
-  <script src="./search.js"></script>
+  <script>
+    // Section dropdown toggling (works for any element with data-section-toggle)
+    document.querySelectorAll('[data-section-toggle]').forEach((title) => {
+      title.addEventListener('click', () => {
+        const content = title.nextElementSibling;
+        const arrow = title.querySelector('.arrow');
+        if (!content || !arrow) return;
+        content.classList.toggle('open');
+        arrow.classList.toggle('rotate');
+      });
+    });
+
+    // Filter panel collapse toggle
+    const filtersToggleBtn = document.getElementById('filtersToggleBtn');
+    const searchLayout = document.getElementById('searchLayout');
+    if (filtersToggleBtn && searchLayout) {
+      filtersToggleBtn.addEventListener('click', () => {
+        searchLayout.classList.toggle('filters-collapsed');
+      });
+    }
+  </script>
+
+  <script type="module" src="./search.js"></script>
 
 </body>
 </html>
