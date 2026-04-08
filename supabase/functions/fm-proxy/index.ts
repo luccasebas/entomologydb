@@ -1,6 +1,7 @@
 // FileMaker proxy Edge Function
 // Forwards requests to FileMaker Server through the Cloudflare tunnel
 // and adds CORS headers so the browser can call it.
+// Also proxies container field images with the session-cookie redirect flow.
 
 const FM_URL = Deno.env.get('FM_URL')!;
 const FM_USER = Deno.env.get('FM_USER')!;
@@ -12,12 +13,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-// Cache the FileMaker token in memory for the function instance
-let cachedToken: string | null = null;
-let cachedTokenDb: string | null = null;
+// The 6 tribes Geoffrey wants visible (used for allowlist check)
+const ALLOWED_TRIBES = [
+  'Amblycerini', 'Bruchini', 'Eubaptini',
+  'Kytorhinini', 'Pachymerini', 'Rhaebini',
+];
+
+
+// Cache of allowed genera (union across the 6 tribes), built lazily
+let allowedGeneraCache: Set<string> | null = null;
+
+// Cache FileMaker tokens per database
+const tokenCache: Record<string, string> = {};
 
 async function getFmToken(database: string): Promise<string> {
-  if (cachedToken && cachedTokenDb === database) return cachedToken;
+  if (tokenCache[database]) return tokenCache[database];
 
   const auth = btoa(`${FM_USER}:${FM_PASS}`);
   const response = await fetch(
@@ -37,9 +47,146 @@ async function getFmToken(database: string): Promise<string> {
   }
 
   const data = await response.json();
-  cachedToken = data.response.token;
-  cachedTokenDb = database;
-  return cachedToken!;
+  tokenCache[database] = data.response.token;
+  return tokenCache[database];
+}
+
+async function getAllowedImageUrls(speciesId: string): Promise<string[] | null> {
+  const token = await getFmToken('Species');
+
+  // 1. Fetch the species record
+  const res = await fetch(
+    `${FM_URL}/fmi/data/v2/databases/Species/layouts/Species/_find`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: [{ Species_ID: `==${speciesId}` }],
+        limit: 1,
+      }),
+    }
+  );
+
+  if (!res.ok) return null;
+  const data = await res.json();
+  const record = data?.response?.data?.[0];
+  if (!record) return null;
+
+  // 2. Validity check (lowercase on the Species layout)
+  if (record.fieldData?.validity !== 'Valid name') return null;
+
+  // 3. Get the species' genus
+  const genus = record.fieldData?.Genus;
+  if (!genus) return null;
+
+  // 4. Single targeted query: does this genus exist in Genus DB with one of our allowed tribes?
+  const genusToken = await getFmToken('Genus');
+  const genusRes = await fetch(
+    `${FM_URL}/fmi/data/v2/databases/Genus/layouts/Genus/_find`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${genusToken}`,
+      },
+      body: JSON.stringify({
+        // OR query: matches if Genus==X AND P::Tribe is any of the 6
+        query: ALLOWED_TRIBES.map((tribe) => ({
+          Genus: `==${genus}`,
+          'P::Tribe': tribe,
+        })),
+        limit: 1,
+      }),
+    }
+  );
+
+  if (!genusRes.ok) return null;
+  const genusData = await genusRes.json();
+  if (!genusData?.response?.data?.length) return null;
+
+  // Genus verified. Extract image URLs.
+  const images = record.portalData?.Related_images || [];
+  return images
+    .map((img: any) => img['Related_images::image_container'])
+    .filter((url: string) => url && url.length > 0);
+}
+
+// Stream an image from FileMaker, handling the session-cookie redirect flow
+async function streamImage(imgUrl: string): Promise<Response> {
+  // Step 1: GET the URL, do NOT auto-follow redirects yet — we need to capture the cookie
+  const initialRes = await fetch(imgUrl, {
+    method: 'GET',
+    redirect: 'manual',
+  });
+
+  // If it's not a redirect, return whatever FileMaker sent
+  if (initialRes.status !== 302 && initialRes.status !== 301) {
+    // Might already be the image
+    if (initialRes.headers.get('content-type')?.startsWith('image/')) {
+      return new Response(initialRes.body, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': initialRes.headers.get('content-type') || 'image/jpeg',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
+    }
+    return new Response(JSON.stringify({ error: 'Unexpected response', status: initialRes.status }), {
+      status: 502,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Extract the session cookie from Set-Cookie
+  const setCookie = initialRes.headers.get('set-cookie') || '';
+  const cookieMatch = setCookie.match(/X-FMS-Session-Key=([^;]+)/);
+  if (!cookieMatch) {
+    return new Response(JSON.stringify({ error: 'No session cookie in redirect' }), {
+      status: 502,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const sessionKey = cookieMatch[1];
+
+  // Extract the redirect location
+  const location = initialRes.headers.get('location');
+  if (!location) {
+    return new Response(JSON.stringify({ error: 'No redirect location' }), {
+      status: 502,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Resolve relative redirect to absolute URL
+  const redirectUrl = new URL(location, imgUrl).toString();
+
+  // Step 2: Follow the redirect with the session cookie
+  const imgRes = await fetch(redirectUrl, {
+    method: 'GET',
+    headers: {
+      'Cookie': `X-FMS-Session-Key=${sessionKey}`,
+    },
+  });
+
+  if (!imgRes.ok) {
+    return new Response(JSON.stringify({ error: 'Image fetch failed', status: imgRes.status }), {
+      status: 502,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  return new Response(imgRes.body, {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': imgRes.headers.get('content-type') || 'image/jpeg',
+      'Cache-Control': 'public, max-age=3600',
+    },
+  });
 }
 
 Deno.serve(async (req) => {
@@ -50,8 +197,6 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-
-    // Strip the function path prefix to get the FileMaker path
     const pathParts = url.pathname.split('/fm-proxy/')[1];
     if (!pathParts) {
       return new Response(JSON.stringify({ error: 'Missing path' }), {
@@ -60,7 +205,62 @@ Deno.serve(async (req) => {
       });
     }
 
-    // First path segment is the database name
+    // NEW: handle image proxy requests
+    // Format: /fm-proxy/image/{species_id}/{index}
+    if (pathParts.startsWith('image/')) {
+      const segments = pathParts.split('/');
+      if (segments.length < 3) {
+        return new Response(JSON.stringify({ error: 'Bad image path' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const speciesId = segments[1];
+      const index = parseInt(segments[2], 10);
+
+      const imageUrls = await getAllowedImageUrls(speciesId);
+      if (!imageUrls) {
+        return new Response(JSON.stringify({ error: 'Forbidden or not found' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (!imageUrls[index]) {
+        return new Response(JSON.stringify({ error: 'Image index out of range' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      return await streamImage(imageUrls[index]);
+    }
+
+    // READ-ONLY WHITELIST: only allow specific operations
+    // Everything else is blocked, even if someone crafts a custom request.
+    const isImageRequest = pathParts.startsWith('image/');
+    const isFindRequest = pathParts.includes('/_find');
+    const isLayoutsList = pathParts.endsWith('/layouts') || pathParts.match(/\/layouts\/[^/]+$/);
+
+    if (!isImageRequest && !isFindRequest && !isLayoutsList) {
+      return new Response(JSON.stringify({
+        error: 'Forbidden: only read operations are allowed'
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Only allow GET (image, layouts list) and POST (_find)
+    if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'OPTIONS') {
+      return new Response(JSON.stringify({
+        error: 'Forbidden: only GET and POST allowed'
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Default: proxy to FileMaker Data API
     const [database, ...rest] = pathParts.split('/');
     const fmPath = '/' + rest.join('/');
 
@@ -80,7 +280,7 @@ Deno.serve(async (req) => {
 
     // If token expired, retry once
     if (fmResponse.status === 401) {
-      cachedToken = null;
+      delete tokenCache[database];
       const newToken = await getFmToken(database);
       const retryResponse = await fetch(
         `${FM_URL}/fmi/data/v2/databases/${database}${fmPath}`,
@@ -102,7 +302,7 @@ Deno.serve(async (req) => {
 
     const responseText = await fmResponse.text();
 
-    // Strip unneeded fields from species responses to reduce payload size
+    // Strip unneeded fields from species responses
     let cleanedText = responseText;
     if (database === 'Species' && fmResponse.ok) {
       try {
@@ -113,15 +313,12 @@ Deno.serve(async (req) => {
             'Author', 'Year', 'Validity', 'Tribe', 'Common',
           ];
           data.response.data = data.response.data.map((record: any) => {
-            // Keep only the fields we want from fieldData
             const slimFieldData = Object.fromEntries(
               keepFields
                 .filter((k) => k in record.fieldData)
                 .map((k) => [k, record.fieldData[k]])
             );
 
-// Keep only Related_images from portalData (URLs aren't useful right now but kept for image_count)
-            // Keep all useful portal data, slimmed where needed
             const slimPortalData: any = {};
             if (record.portalData?.Related_images) {
               slimPortalData.Related_images = record.portalData.Related_images.map((img: any) => ({
@@ -166,7 +363,6 @@ Deno.serve(async (req) => {
         const data = JSON.parse(cleanedText);
         if (data?.response?.data && data?.response?.dataInfo?.layout === 'Locality') {
           data.response.data = data.response.data.map((record: any) => {
-            // Keep only essentials: location fields + Species_Locality portal (bruchids only)
             const f = record.fieldData || {};
             const slimFieldData = {
               Locality_ID: f.Locality_ID,
@@ -176,7 +372,6 @@ Deno.serve(async (req) => {
               'decimal latitude': f['decimal latitude'],
               'decimal longitude': f['decimal longitude'],
             };
-            // Keep only Species_Locality portal, with just full names + tribe info
             const slimPortalData: any = {};
             if (record.portalData?.Species_Locality) {
               slimPortalData.Species_Locality = record.portalData.Species_Locality.map((sp: any) => ({
@@ -195,9 +390,48 @@ Deno.serve(async (req) => {
           });
           cleanedText = JSON.stringify(data);
         }
-      } catch {
-        // If parsing fails, return original
-      }
+      } catch {}
+    }
+
+    if (database === 'Specimen' && fmResponse.ok) {
+      try {
+        const data = JSON.parse(cleanedText);
+        if (data?.response?.data) {
+          const keepFields = [
+            'Specimen_ID', 'Species_ID', 'sex', 'stage', 'collecting_method',
+            'determined by', 'ss', 'Tape', 'stored', 'medium',
+            'Species::Full_name', 'Host species::Full_name', 'Host species::Family',
+            'Citation::full_citation', 'Event_ID',
+            'Events::country', 'Events::province', 'Events::County',
+            'Events::locality', 'Events::full_date', 'Events::collector',
+            'Events::coordinates', 'Specimen notes',
+          ];
+          data.response.data = data.response.data.map((record: any) => {
+            const slimFieldData = Object.fromEntries(
+              keepFields
+                .filter((k) => k in (record.fieldData || {}))
+                .map((k) => [k, record.fieldData[k]])
+            );
+            const slimPortalData: any = {};
+            if (record.portalData?.Related_images) {
+              slimPortalData.Related_images = record.portalData.Related_images.map((img: any) => ({
+                'Related_images::image_container': img['Related_images::image_container'],
+                'Related_images::image_category': img['Related_images::image_category'],
+                'Related_images::full caption': img['Related_images::full caption'],
+                'Related_images::source': img['Related_images::source'],
+                'Related_images::copyright': img['Related_images::copyright'],
+              }));
+            }
+            return {
+              recordId: record.recordId,
+              modId: record.modId,
+              fieldData: slimFieldData,
+              portalData: slimPortalData,
+            };
+          });
+          cleanedText = JSON.stringify(data);
+        }
+      } catch {}
     }
 
     return new Response(cleanedText, {
