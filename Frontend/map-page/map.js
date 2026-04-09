@@ -3,6 +3,7 @@
 // Clicking a pin or drawing a bounding box navigates to the search page.
 
 import { getMapPoints, getLocality } from '../shared/bruchindb-api.js';
+import { polygonFromCorners } from './boundingbox-utils.js';
 
 
 // ============================================================
@@ -115,22 +116,6 @@ function clearBbox() {
   src.setData({ type: "Feature", geometry: { type: "Polygon", coordinates: [[]] } });
   currentBbox = null;
   hideBboxPrompt();
-}
-
-function polygonFromCorners(a, b) {
-  const west = Math.min(a.lng, b.lng);
-  const east = Math.max(a.lng, b.lng);
-  const south = Math.min(a.lat, b.lat);
-  const north = Math.max(a.lat, b.lat);
-  return {
-    type: "Feature",
-    geometry: {
-      type: "Polygon",
-      coordinates: [[
-        [west, south], [east, south], [east, north], [west, north], [west, south],
-      ]],
-    },
-  };
 }
 
 function setBboxPreview(a, b) {
