@@ -36,107 +36,237 @@
       </p>
     </section>
 
-    <!-- Upload Photo block -->
     <section class="blue-section">
       <div class="blue-inner">
-        <h2>Upload Photos</h2>
+        <!-- Upload Photo block -->
+        <div class="form-section">
+          <h2>Upload Photos</h2>
 
-        <div
-          class="dropzone"
-          role="button"
-          tabindex="0"
-          aria-label="Upload a photo file"
-          data-input-id="photoFile"
-        >
-          <div class="dropzone-box">
-            <div class="dz-icon" aria-hidden="true">☁︎</div>
-            <div class="dz-title">Upload a File</div>
-            <div class="dz-sub">Drag and drop files here</div>
-            <div class="file-name" id="photoFileName" aria-live="polite"></div>
+          <div
+            class="dropzone"
+            role="button"
+            tabindex="0"
+            aria-label="Upload a photo file"
+            data-input-id="photoFile"
+          >
+            <div class="dropzone-box">
+              <div class="dz-icon" aria-hidden="true">☁︎</div>
+              <div class="dz-title">Upload a File</div>
+              <div class="dz-sub">Drag and drop files here</div>
+              <div class="file-name" id="photoFileName" aria-live="polite"></div>
+            </div>
           </div>
+
+          <input
+            class="file-input hidden-input"
+            id="photoFile"
+            type="file"
+            aria-label="Choose photo file to upload"
+          />
         </div>
-
-        <input
-          class="file-input hidden-input"
-          id="photoFile"
-          type="file"
-          aria-label="Choose photo file to upload"
-        />
-      </div>
-    </section>
-
-    <!-- Upload Additional Information + Contact Information -->
-    <section class="blue-section blue-section-2">
-      <div class="blue-inner">
-        <h2>Upload Additional Information</h2>
-
-        <div
-          class="dropzone"
-          role="button"
-          tabindex="0"
-          aria-label="Upload an additional information file"
-          data-input-id="infoFile"
-        >
-          <div class="dropzone-box">
-            <div class="dz-icon" aria-hidden="true">☁︎</div>
-            <div class="dz-title">Upload a File</div>
-            <div class="dz-sub">Drag and drop files here</div>
-            <div class="file-name" id="infoFileName" aria-live="polite"></div>
-          </div>
-        </div>
-
-        <input
-          class="file-input hidden-input"
-          id="infoFile"
-          type="file"
-          aria-label="Choose additional information file to upload"
-        />
-
-        <h2 class="contact-title">Contact Information</h2>
 
         <form class="contact-form" id="contactForm" action="#" method="post" novalidate>
-          <div class="field-row">
-            <label class="field-label" for="firstName">Full Name</label>
+          <!-- Locality -->
+          <section class="form-section">
+            <h2>Locality</h2>
+            <p class="section-subtitle">Where was the specimen found?</p>
 
-            <div class="name-grid">
-              <div class="input-wrap">
+            <div class="field-row field-row-short">
+              <label class="field-label" for="latitude">Latitude</label>
+              <div class="input-wrap short-input">
                 <input
-                  id="firstName"
-                  name="firstName"
+                  id="latitude"
+                  name="latitude"
                   type="text"
                   class="input"
-                  placeholder="First Name"
-                  autocomplete="given-name"
-                />
-              </div>
-
-              <div class="input-wrap">
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  class="input"
-                  placeholder="Last Name"
-                  autocomplete="family-name"
+                  placeholder="(e.g., 32.7157)"
                 />
               </div>
             </div>
-          </div>
 
-          <div class="field-row">
-            <label class="field-label" for="email">E-mail</label>
-
-            <div class="input-wrap full">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                class="input"
-                placeholder="ex: myname@example.com"
-                autocomplete="email"
-              />
+            <div class="field-row field-row-short">
+              <label class="field-label" for="longitude">Longitude</label>
+              <div class="input-wrap short-input">
+                <input
+                  id="longitude"
+                  name="longitude"
+                  type="text"
+                  class="input"
+                  placeholder="(e.g., -117.1611)"
+                />
+              </div>
             </div>
-          </div>
+
+            <div class="field-row">
+              <label class="field-label" for="locationDescription">Location Description</label>
+              <div class="input-wrap wide-input">
+                <input
+                  id="locationDescription"
+                  name="locationDescription"
+                  type="text"
+                  class="input"
+                  placeholder="(e.g., San Diego, CA, near coastal sage scrub habitat)"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- Host -->
+          <section class="form-section">
+            <h2>Host</h2>
+            <p class="section-subtitle">What plant was the specimen associated with?</p>
+
+            <div class="field-row">
+              <label class="field-label" for="hostPlantName">Host Plant Name</label>
+              <div class="input-wrap medium-input">
+                <input
+                  id="hostPlantName"
+                  name="hostPlantName"
+                  type="text"
+                  class="input"
+                  placeholder="(e.g., Acacia farnesiana)"
+                />
+              </div>
+            </div>
+
+            <div class="field-row field-row-host">
+              <span class="field-label">Host Type</span>
+
+              <div class="host-type-group" role="radiogroup" aria-label="Host type">
+                <label class="host-option">
+                  <input type="radio" name="hostType" value="Seed" />
+                  <span class="host-circle" aria-hidden="true"></span>
+                  <span class="host-text">Seed</span>
+                </label>
+
+                <label class="host-option">
+                  <input type="radio" name="hostType" value="Pod" />
+                  <span class="host-circle" aria-hidden="true"></span>
+                  <span class="host-text">Pod</span>
+                </label>
+
+                <label class="host-option">
+                  <input type="radio" name="hostType" value="Flower" />
+                  <span class="host-circle" aria-hidden="true"></span>
+                  <span class="host-text">Flower</span>
+                </label>
+
+                <label class="host-option">
+                  <input type="radio" name="hostType" value="Unknown" />
+                  <span class="host-circle" aria-hidden="true"></span>
+                  <span class="host-text">Unknown</span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <!-- Collector -->
+          <section class="form-section">
+            <h2>Collector</h2>
+            <p class="section-subtitle">Who collected or observed the specimen?</p>
+
+            <div class="field-row">
+              <label class="field-label" for="firstName">Full Name</label>
+
+              <div class="name-grid">
+                <div class="input-wrap">
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    class="input"
+                    placeholder="First Name"
+                    autocomplete="given-name"
+                  />
+                </div>
+
+                <div class="input-wrap">
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    class="input"
+                    placeholder="Last Name"
+                    autocomplete="family-name"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="email">E-mail</label>
+
+              <div class="input-wrap collector-email-input">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  class="input"
+                  placeholder="ex: myname@example.com"
+                  autocomplete="email"
+                />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="collectionDate">Collection Date</label>
+              <div class="input-wrap medium-input">
+                <input
+                  id="collectionDate"
+                  name="collectionDate"
+                  type="text"
+                  class="input"
+                  placeholder="(MM/DD/YYYY)"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- Additional Notes -->
+          <section class="form-section">
+            <h2>Additional Notes</h2>
+            <p class="section-subtitle">Anything notable about the specimen?</p>
+
+            <div class="field-row">
+              <label class="field-label" for="description">Description</label>
+              <div class="input-wrap notes-input">
+                <input
+                  id="description"
+                  name="description"
+                  type="text"
+                  class="input"
+                  placeholder="(e.g., color, size, behavior, abundance, etc.)"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- Upload Additional Information -->
+          <section class="form-section">
+            <h2>Upload Additional Information</h2>
+
+            <div
+              class="dropzone"
+              role="button"
+              tabindex="0"
+              aria-label="Upload an additional information file"
+              data-input-id="infoFile"
+            >
+              <div class="dropzone-box">
+                <div class="dz-icon" aria-hidden="true">☁︎</div>
+                <div class="dz-title">Upload a File</div>
+                <div class="dz-sub">Drag and drop files here</div>
+                <div class="file-name" id="infoFileName" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <input
+              class="file-input hidden-input"
+              id="infoFile"
+              type="file"
+              aria-label="Choose additional information file to upload"
+            />
+          </section>
         </form>
       </div>
     </section>
@@ -145,7 +275,6 @@
     <section class="submit-section">
       <div class="submit-wrap">
         <button class="submit-btn" id="submitBtn" type="button">Submit</button>
-
         <p id="confirmationMessage" class="confirmation hidden" aria-live="polite"></p>
       </div>
     </section>
@@ -159,6 +288,12 @@
     const firstNameInput = document.getElementById("firstName");
     const lastNameInput = document.getElementById("lastName");
     const emailInput = document.getElementById("email");
+    const latitudeInput = document.getElementById("latitude");
+    const longitudeInput = document.getElementById("longitude");
+    const locationDescriptionInput = document.getElementById("locationDescription");
+    const hostPlantNameInput = document.getElementById("hostPlantName");
+    const collectionDateInput = document.getElementById("collectionDate");
+    const descriptionInput = document.getElementById("description");
     const photoFileInput = document.getElementById("photoFile");
     const infoFileInput = document.getElementById("infoFile");
     const contactForm = document.getElementById("contactForm");
@@ -214,29 +349,40 @@
       clearMessage();
     });
 
-    [firstNameInput, lastNameInput, emailInput].forEach((input) => {
+    [
+      firstNameInput,
+      lastNameInput,
+      emailInput,
+      latitudeInput,
+      longitudeInput,
+      locationDescriptionInput,
+      hostPlantNameInput,
+      collectionDateInput,
+      descriptionInput
+    ].forEach((input) => {
       input.addEventListener("input", clearMessage);
+    });
+
+    document.querySelectorAll('input[name="hostType"]').forEach((input) => {
+      input.addEventListener("change", clearMessage);
     });
 
     submitBtn.addEventListener("click", async () => {
       const firstName = firstNameInput.value.trim();
       const lastName = lastNameInput.value.trim();
       const email = emailInput.value.trim();
+      const latitude = latitudeInput.value.trim();
+      const longitude = longitudeInput.value.trim();
+      const locationDescription = locationDescriptionInput.value.trim();
+      const hostPlantName = hostPlantNameInput.value.trim();
+      const collectionDate = collectionDateInput.value.trim();
+      const description = descriptionInput.value.trim();
+      const selectedHostType = document.querySelector('input[name="hostType"]:checked');
 
       clearMessage();
 
-      if (!firstName || !lastName || !email) {
-        showMessage("Please fill out all contact information before submitting.", true);
-        return;
-      }
-
-      if (!emailInput.checkValidity()) {
+      if (email && !emailInput.checkValidity()) {
         showMessage("Please enter a valid email address.", true);
-        return;
-      }
-
-      if (!photoFileInput.files.length && !infoFileInput.files.length) {
-        showMessage("Please upload at least one file before submitting.", true);
         return;
       }
 
@@ -244,6 +390,13 @@
       formData.append("firstName", firstName);
       formData.append("lastName", lastName);
       formData.append("email", email);
+      formData.append("latitude", latitude);
+      formData.append("longitude", longitude);
+      formData.append("locationDescription", locationDescription);
+      formData.append("hostPlantName", hostPlantName);
+      formData.append("hostType", selectedHostType ? selectedHostType.value : "");
+      formData.append("collectionDate", collectionDate);
+      formData.append("description", description);
 
       if (photoFileInput.files.length > 0) {
         formData.append("photoFile", photoFileInput.files[0]);

@@ -2,6 +2,7 @@
 import { CONFIG as APP_CONFIG } from './config.js';
 
 let genusCacheByTribe = {};
+let allowedGeneraSet = null;
 
 const CONFIG = {
   fmUrl: APP_CONFIG.fileMakerUrl,
@@ -32,38 +33,52 @@ export function getTribes() {
   return [...TRIBES];
 }
 
+async function getGeneraForTribe(tribe) {
+  if (genusCacheByTribe[tribe]) return genusCacheByTribe[tribe];
+  try {
+    const data = await fmRequest('Genus', '/layouts/Genus/_find', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: [{ 'P::Tribe': tribe }],
+        limit: 1000,
+      }),
+    });
+    genusCacheByTribe[tribe] = (data.response?.data || []).map((r) => r.fieldData.Genus);
+  } catch (err) {
+    console.error(`Genera fetch failed for ${tribe}:`, err);
+    genusCacheByTribe[tribe] = [];
+  }
+  return genusCacheByTribe[tribe];
+}
+
+async function getAllowedGenera() {
+  if (allowedGeneraSet) return allowedGeneraSet;
+  const all = new Set();
+  for (const tribe of TRIBES) {
+    const list = await getGeneraForTribe(tribe);
+    for (const g of list) all.add(g);
+  }
+  allowedGeneraSet = all;
+  return allowedGeneraSet;
+}
+
 // ============================================================
 // SEARCH
 // ============================================================
 export async function searchSpecies(filters = {}) {
-  let genusList = null;
+  // Determine which genera the user is allowed to see
+  let genusFilterSet;
   if (filters.tribe) {
-    if (genusCacheByTribe[filters.tribe]) {
-      genusList = genusCacheByTribe[filters.tribe];
-    } else {
-      try {
-        const genusData = await fmRequest('Genus', '/layouts/Genus/_find', {
-          method: 'POST',
-          body: JSON.stringify({
-            query: [{ 'P::Tribe': filters.tribe }],
-            limit: 1000,
-          }),
-        });
-        genusList = (genusData.response?.data || []).map((r) => r.fieldData.Genus);
-        genusCacheByTribe[filters.tribe] = genusList;
-      } catch (err) {
-        console.error('Genus lookup failed:', err);
-        return [];
-      }
-    }
-    if (genusList.length === 0) return [];
+    const list = await getGeneraForTribe(filters.tribe);
+    genusFilterSet = new Set(list);
+    if (genusFilterSet.size === 0) return [];
+  } else {
+    genusFilterSet = await getAllowedGenera();
   }
 
-  // Step 1.5: If location filter is set, query Locality DB to get bruchid species names at those localities
+  // Location filter (queries Locality DB to get bruchid species names at those localities)
   let speciesNameAllowlist = null;
   if (filters.countries || filters.provinces || filters.localities) {
-    // Build OR'd queries: each country/province/locality combo gets its own query
-    // Expand selected countries to include all spelling variants
     let expandedCountries = [''];
     if (filters.countries) {
       expandedCountries = [];
@@ -74,10 +89,9 @@ export async function searchSpecies(filters = {}) {
       }
     }
     const queries = [];
-    const countries = expandedCountries;
     const provinces = filters.provinces || [''];
     const localities = filters.localities || [''];
-    for (const c of countries) {
+    for (const c of expandedCountries) {
       for (const p of provinces) {
         for (const l of localities) {
           const q = {};
@@ -92,16 +106,11 @@ export async function searchSpecies(filters = {}) {
     try {
       const locData = await fmRequest('Event', '/layouts/Locality/_find', {
         method: 'POST',
-        body: JSON.stringify({
-          query: queries,
-          limit: 1000,
-        }),
+        body: JSON.stringify({ query: queries, limit: 1000 }),
       });
-      const localities = locData.response?.data || [];
-      // Extract bruchid species names from each locality's Species_Locality portal
-      // Only include species in the Bruchinae family (excludes host plants)
+      const localitiesData = locData.response?.data || [];
       const names = new Set();
-      for (const loc of localities) {
+      for (const loc of localitiesData) {
         const sps = loc.portalData?.Species_Locality || [];
         for (const sp of sps) {
           if (sp['Species_Locality::Family'] === 'Bruchinae') {
@@ -117,26 +126,22 @@ export async function searchSpecies(filters = {}) {
     }
   }
 
+  // Build the species query — one OR per allowed genus
   let queries;
   if (filters.speciesIds && filters.speciesIds.length > 0) {
-    // Direct species_id filter — one OR query per ID
     queries = filters.speciesIds.map((id) => ({
       Species_ID: `==${id}`,
       Validity: 'Valid name',
     }));
-  } else if (genusList) {
-    queries = genusList.map((genus) => {
+  } else {
+    queries = [...genusFilterSet].map((genus) => {
       const q = { Genus: `==${genus}`, Validity: 'Valid name' };
       if (filters.scientificName) q.Species = `*${filters.scientificName}*`;
-      if (filters.genus) q.Genus = `*${filters.genus}*`;
       return q;
     });
-  } else {
-    const q = { Validity: 'Valid name' };
-    if (filters.scientificName) q.Species = `*${filters.scientificName}*`;
-    if (filters.genus) q.Genus = `*${filters.genus}*`;
-    queries = [q];
   }
+
+  if (queries.length === 0) return [];
 
   const data = await fmRequest('Species', '/layouts/Lookup species/_find', {
     method: 'POST',
@@ -165,10 +170,8 @@ export async function searchSpecies(filters = {}) {
     };
   });
 
-  // Apply location allowlist filter
   if (speciesNameAllowlist) {
     mapped = mapped.filter((s) => {
-      // Check if any name in the allowlist starts with the species' Genus + Species
       const speciesNamePrefix = `${s.Genus} ${s.Species}`;
       for (const fullName of speciesNameAllowlist) {
         if (fullName.startsWith(speciesNamePrefix)) return true;
@@ -214,7 +217,6 @@ export async function getSpecies(speciesId) {
     medium: s['Specimens::medium'] || '',
   }));
 
-  // Build a quick lookup of coordinates by locality name from Geolib
   const geolibByLocality = {};
   for (const g of (portals.Geolib || [])) {
     const locName = g['Geolib::locality'] || '';
@@ -268,7 +270,60 @@ export async function getSpecies(speciesId) {
 }
 
 // ============================================================
-// MAP - stubs to be wired later
+// SPECIMEN DETAIL
+// ============================================================
+export async function getSpecimen(specimenId) {
+  const data = await fmRequest('Specimen', '/layouts/Specimen record/_find', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: [{ Specimen_ID: `==${specimenId}` }],
+      limit: 1,
+    }),
+  });
+
+  if (!data.response?.data?.[0]) return null;
+
+  const record = data.response.data[0];
+  const f = record.fieldData;
+  const portals = record.portalData || {};
+
+  const images = (portals.Related_images || []).map((img) => ({
+    url: img['Related_images::image_container'] || '',
+    category: img['Related_images::image_category'] || '',
+    caption: img['Related_images::full caption'] || '',
+    source: img['Related_images::source'] || '',
+    copyright: img['Related_images::copyright'] || '',
+  }));
+
+  return {
+    Specimen_ID: f.Specimen_ID || '',
+    Species_ID: f.Species_ID || '',
+    species_full_name: f['Species::Full_name'] || '',
+    sex: f.sex || '',
+    stage: f.stage || '',
+    collecting_method: f.collecting_method || '',
+    determined_by: f['determined by'] || '',
+    ss: f.ss || '',
+    Tape: f.Tape || '',
+    stored: f.stored || '',
+    medium: f.medium || '',
+    host_species_name: f['Host species::Full_name'] || '',
+    host_species_family: f['Host species::Family'] || '',
+    citation: f['Citation::full_citation'] || '',
+    Event_ID: f.Event_ID || '',
+    event_country: f['Events::country'] || '',
+    event_province: f['Events::province'] || '',
+    event_county: f['Events::County'] || '',
+    event_locality: f['Events::locality'] || '',
+    event_date: f['Events::full_date'] || '',
+    event_collector: f['Events::collector'] || '',
+    notes: f['Specimen notes'] || '',
+    images,
+  };
+}
+
+// ============================================================
+// MAP - stubs
 // ============================================================
 export async function getMapPoints(filters = {}) {
   return [];
