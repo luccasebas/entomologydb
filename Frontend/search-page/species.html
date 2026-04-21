@@ -35,7 +35,7 @@
   </nav>
 
   <main class="species-page">
-    <!-- Centered species title like your inspiration -->
+
     <div class="species-hero">
       <h1 class="species-title">Acanthoscelides obtectus</h1>
       <p class="species-subtitle">230 specimens documented</p>
@@ -45,9 +45,6 @@
       <button type="button" id="viewToggle" class="view-toggle-btn">Show all sections</button>
     </div>
 
-    <nav class="tabs" aria-label="Species sections">
-
-    <!-- Tabs -->
     <nav class="tabs" aria-label="Species sections">
       <button class="tab-btn is-active" data-tab="taxon" aria-selected="true" role="tab">
         Taxonomic Information
@@ -66,11 +63,9 @@
       </button>
     </nav>
 
-    <!-- Tab panels -->
     <section class="tab-panel is-active" id="taxon" role="tabpanel">
       <div class="panel-card">
         <h2 class="panel-title">Taxonomic Information</h2>
-
         <div class="info-grid">
           <div class="info-item">
             <div class="info-label">Kingdom</div>
@@ -111,23 +106,7 @@
     <section class="tab-panel" id="images" role="tabpanel">
       <div class="panel-card">
         <h2 class="panel-title">Images</h2>
-
-        <div class="image-grid">
-          <figure class="image-tile">
-            <img src="./seed_beetle_logo_transparent.png" alt="Default beetle placeholder" />
-            <figcaption>Placeholder image</figcaption>
-          </figure>
-
-          <figure class="image-tile">
-            <img src="./seed_beetle_logo_transparent.png" alt="Default beetle placeholder" />
-            <figcaption>Placeholder image</figcaption>
-          </figure>
-
-          <figure class="image-tile">
-            <img src="./seed_beetle_logo_transparent.png" alt="Default beetle placeholder" />
-            <figcaption>Placeholder image</figcaption>
-          </figure>
-        </div>
+        <div class="image-grid"></div>
       </div>
     </section>
 
@@ -149,30 +128,25 @@
       </div>
     </section>
 
-    <!-- Events Tab -->
-    <section class="tab-panel" id="events">
-    <div class="panel-card">
-        <h2>Events</h2>
-
+    <section class="tab-panel" id="events" role="tabpanel">
+      <div class="panel-card">
+        <h2 class="panel-title">Events</h2>
         <div class="table-wrap">
-        <table class="data-table">
+          <table class="data-table">
             <thead>
-            <tr>
+              <tr>
                 <th>Country</th>
                 <th>Province</th>
                 <th>Locality</th>
                 <th>Elevation</th>
                 <th>Coordinates</th>
                 <th>Date</th>
-            </tr>
+              </tr>
             </thead>
-
-            <tbody>
-
-            </tbody>
-        </table>
+            <tbody></tbody>
+          </table>
         </div>
-    </div>
+      </div>
     </section>
 
     <section class="tab-panel" id="map" role="tabpanel">

@@ -44,7 +44,6 @@ async function loadSpecimen() {
     return;
   }
 
-  // Try cache first
   const cached = sessionStorage.getItem('specimen:' + specimenId);
   if (cached) {
     try {
@@ -90,7 +89,6 @@ function renderSpecimen(sp) {
     ? `<a href="./species.html?id=${encodeURIComponent(sp.Species_ID)}&tab=${sessionStorage.getItem('lastSpeciesTab:' + sp.Species_ID) || 'taxon'}"><em>${escapeHtml(sp.species_full_name)}</em></a>`
     : '';
 
-  // Specimen info
   specimenInfoEl.innerHTML = [
     infoItem('Specimen ID', sp.Specimen_ID),
     infoItem('Sex', sp.sex),
@@ -103,7 +101,6 @@ function renderSpecimen(sp) {
     infoItem('Stored At', sp.stored),
   ].filter(Boolean).join('') || '<p class="empty">No specimen details recorded.</p>';
 
-  // Event info
   eventInfoEl.innerHTML = [
     infoItem('Country', sp.event_country),
     infoItem('Province', sp.event_province),
@@ -111,10 +108,8 @@ function renderSpecimen(sp) {
     infoItem('Locality', sp.event_locality),
     infoItem('Date', sp.event_date),
     infoItem('Collector', sp.event_collector),
-    infoItem('Event ID', sp.Event_ID),
   ].filter(Boolean).join('') || '<p class="empty">No collection event recorded.</p>';
 
-  // Host plant (only if present)
   const hasHost = (sp.host_species_name && sp.host_species_name.trim()) ||
                   (sp.host_species_family && sp.host_species_family.trim());
   if (hasHost) {
@@ -125,19 +120,16 @@ function renderSpecimen(sp) {
     ].filter(Boolean).join('');
   }
 
-  // Citation
   if (sp.citation && sp.citation.trim()) {
     citationSection.style.display = '';
     citationTextEl.textContent = sp.citation;
   }
 
-  // Notes
   if (sp.notes && sp.notes.trim()) {
     notesSection.style.display = '';
     notesTextEl.textContent = sp.notes;
   }
 
-  // Images
   if (sp.images && sp.images.length > 0) {
     imagesSection.style.display = '';
     const proxyBase = CONFIG.fileMakerUrl + '/image/specimen/' + encodeURIComponent(sp.Specimen_ID);

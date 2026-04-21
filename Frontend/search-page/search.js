@@ -8,6 +8,7 @@ import {
   TRIBES,
 } from '../shared/bruchindb-api.js';
 
+sessionStorage.removeItem('breadcrumbActive');
 
 // ============================================================
 // ELEMENT REFERENCES
@@ -407,8 +408,7 @@ function renderCards(species) {
         <p class="card-meta">
           Subfamily Bruchinae${s.Tribe ? ` · ${escapeHtml(s.Tribe)}` : ''}
         </p>
-        <span class="learn-more">Learn More →</span>
-      </div>
+        <span class="learn-more">Learn More →</span>      </div>
       <img
         class="species-img"
         src="./seed_beetle_logo_transparent.png"
