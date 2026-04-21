@@ -188,8 +188,8 @@ body{
 .results-panel{
   flex:1;
   padding:40px;
+  min-width:0;
 }
-
 .results-placeholder{
   background:white;
   padding:30px;
@@ -200,8 +200,9 @@ body{
 /* Cards grid on the right */
 .cards-grid{
   display:grid;
-  grid-template-columns:repeat(2, minmax(280px, 1fr));
+  grid-template-columns:repeat(2, 1fr);
   gap:26px;
+  width:100%;
 }
 
 /* Individual species card */
@@ -253,30 +254,8 @@ body{
 
 /* ---------- Species Page ---------- */
 
-.species-topbar{
-  height:64px;
-  background:#76b476;
-  display:flex;
-  align-items:center;
-  padding:0 24px;
-}
-
-.species-topbar-link{
-  color:white;
-  text-decoration:none;
-  font-weight:700;
-}
-
-.species-topbar-link:hover{
-  text-decoration:underline;
-}
-
-.species-topbar-spacer{
-  flex:1;
-}
-
 .species-page{
-  max-width:1100px;
+  max-width:1300px;
   margin:28px auto 60px auto;
   padding:0 24px;
 }
@@ -296,6 +275,12 @@ body{
   margin:10px 0 0 0;
   color:#666;
   font-size:16px;
+}
+
+#species-map {
+  width: 100%;
+  height: 500px;
+  border-radius: 8px;
 }
 
 /* Tabs */
@@ -325,6 +310,10 @@ body{
 /* Panels */
 .tab-panel{
   display:none;
+}
+
+.tab-panel.show-all{
+  display:block;
 }
 
 .tab-panel.is-active{
@@ -455,7 +444,6 @@ body{
 .data-table{
   width:100%;
   border-collapse:collapse;
-  min-width:900px;
 }
 
 .data-table th,
@@ -463,6 +451,15 @@ body{
   padding:14px 16px;
   border-top:1px solid rgba(0,0,0,0.06);
   text-align:left;
+}
+
+.data-table td{
+  white-space:normal;
+  overflow-wrap:break-word;
+  word-break:normal;
+}
+
+.data-table th{
   white-space:nowrap;
 }
 
@@ -522,6 +519,7 @@ body{
   padding: 60px 20px;
   color: #666;
   font-size: 16px;
+  width: 100%;
 }
 
 .results-message.error {
@@ -871,4 +869,158 @@ body{
     top: 8px;
     left: 8px;
   }
+}
+
+a.species-card {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+a.species-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.clickable-row:hover {
+  background: #f0f7f0;
+}
+
+.breadcrumbs {
+  padding: 12px 24px;
+  font-size: 14px;
+  color: #666;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.breadcrumbs a {
+  color: #76b476;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-sep {
+  margin: 0 8px;
+  color: #ccc;
+}
+
+.breadcrumb-current {
+  color: #333;
+  font-weight: 600;
+}
+
+.main-view {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.map-popup {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.popup-header {
+  padding: 12px 14px 8px;
+  font-size: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.popup-stats {
+  padding: 8px 14px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.popup-coords {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.popup-events {
+  border-top: 1px solid #eee;
+  padding: 8px 14px 12px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.popup-event-row {
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 12px;
+}
+
+.popup-event-row:last-child {
+  border-bottom: none;
+}
+
+.popup-event-date {
+  font-weight: 600;
+  color: #333;
+  min-width: 100px;
+}
+
+.popup-event-collector {
+  color: #666;
+  flex: 1;
+}
+
+.popup-event-elev {
+  color: #888;
+  font-size: 11px;
+}
+
+.popup-event-more {
+  padding-top: 6px;
+  font-size: 12px;
+  color: #76b476;
+  font-weight: 600;
+}
+
+.maplibregl-popup-content {
+  padding: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.view-toggle {
+  text-align: center;
+  margin: 10px 0 0 0;
+}
+
+.view-toggle-btn {
+  background: transparent;
+  border: 1px solid #ddd;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+}
+
+.view-toggle-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.species-page .tab-panel.is-active {
+  display: block;
+  width: 100%;
 }
