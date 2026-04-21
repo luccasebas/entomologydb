@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-import os
 from datetime import datetime
-import smtplib
 from email.message import EmailMessage
+import mimetypes
+import os
+import smtplib
 
 app = Flask(__name__)
 CORS(app)
@@ -14,16 +15,17 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB max upload
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 mb max upload
 
 ALLOWED_EXTENSIONS = {
     "png", "jpg", "jpeg", "gif", "webp",
     "pdf", "doc", "docx", "txt", "csv", "xlsx"
 }
 
-EMAIL_SENDER = "jwbayon23@gmail.com"
-EMAIL_RECEIVER = "jwbayon23@gmail.com"
+EMAIL_SENDER = os.getenv("BRUCHINDB_EMAIL_SENDER", "jwbayon23@gmail.com")
+EMAIL_RECEIVER = os.getenv("BRUCHINDB_EMAIL_RECEIVER", "jwbayon23@gmail.com")
 EMAIL_APP_PASSWORD = os.getenv("BRUCHINDB_EMAIL_APP_PASSWORD")
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -36,35 +38,68 @@ def build_unique_filename(filename):
     return f"{name}_{timestamp}{ext}"
 
 
-def send_submission_email(first_name, last_name, email, saved_file_paths):
-    msg = EmailMessage()
-    msg["Subject"] = "BruchinDB | You Received a New Seed Beetle Submission!"
-    msg["From"] = EMAIL_SENDER
-    msg["To"] = EMAIL_RECEIVER
+def get_attachment_type(file_path):
+    mime_type, _ = mimetypes.guess_type(file_path)
 
+    if mime_type and "/" in mime_type:
+        return mime_type.split("/", 1)
+
+    return "application", "octet-stream"
+
+
+def build_email_body(form_data, saved_file_paths):
     attached_names = [os.path.basename(path) for path in saved_file_paths]
 
-    msg.set_content(
-        f"""A new BruchinDB seed beetle submission was received.
+    return f"""A new BruchinDB seed beetle submission was received.
 
-First name: {first_name}
-Last name: {last_name}
-Email: {email}
+collector information
+first name: {form_data.get("firstName", "")}
+last name: {form_data.get("lastName", "")}
+email: {form_data.get("email", "")}
 
-Attached files:
+locality
+latitude: {form_data.get("latitude", "")}
+longitude: {form_data.get("longitude", "")}
+location description: {form_data.get("locationDescription", "")}
+
+host
+host plant name: {form_data.get("hostPlantName", "")}
+host type: {form_data.get("hostType", "")}
+
+collection
+collection date: {form_data.get("collectionDate", "")}
+
+additional notes
+description: {form_data.get("description", "")}
+
+attached files
 {chr(10).join(attached_names) if attached_names else "No files attached"}
 """
-    )
+
+
+def send_submission_email(form_data, saved_file_paths):
+    if not EMAIL_APP_PASSWORD:
+        raise RuntimeError(
+            "Missing BRUCHINDB_EMAIL_APP_PASSWORD environment variable."
+        )
+
+    msg = EmailMessage()
+    msg["Subject"] = "BruchinDB | New Seed Beetle Submission"
+    msg["From"] = EMAIL_SENDER
+    msg["To"] = EMAIL_RECEIVER
+    msg.set_content(build_email_body(form_data, saved_file_paths))
 
     for file_path in saved_file_paths:
         with open(file_path, "rb") as f:
             file_data = f.read()
-            file_name = os.path.basename(file_path)
+
+        file_name = os.path.basename(file_path)
+        maintype, subtype = get_attachment_type(file_path)
 
         msg.add_attachment(
             file_data,
-            maintype="application",
-            subtype="octet-stream",
+            maintype=maintype,
+            subtype=subtype,
             filename=file_name
         )
 
@@ -75,23 +110,32 @@ Attached files:
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    first_name = request.form.get("firstName", "").strip()
-    last_name = request.form.get("lastName", "").strip()
-    email = request.form.get("email", "").strip()
+    form_data = {
+        "firstName": request.form.get("firstName", "").strip(),
+        "lastName": request.form.get("lastName", "").strip(),
+        "email": request.form.get("email", "").strip(),
+        "latitude": request.form.get("latitude", "").strip(),
+        "longitude": request.form.get("longitude", "").strip(),
+        "locationDescription": request.form.get("locationDescription", "").strip(),
+        "hostPlantName": request.form.get("hostPlantName", "").strip(),
+        "hostType": request.form.get("hostType", "").strip(),
+        "collectionDate": request.form.get("collectionDate", "").strip(),
+        "description": request.form.get("description", "").strip()
+    }
 
     photo_file = request.files.get("photoFile")
     info_file = request.files.get("infoFile")
 
-    if not first_name or not last_name or not email:
+    if form_data["email"] and "@" not in form_data["email"]:
         return jsonify({
             "success": False,
-            "error": "Missing contact information."
+            "error": "Invalid email address."
         }), 400
 
-    if not photo_file and not info_file:
+    if not any(form_data.values()) and not (photo_file and photo_file.filename) and not (info_file and info_file.filename):
         return jsonify({
             "success": False,
-            "error": "No files were uploaded."
+            "error": "Submission is empty."
         }), 400
 
     saved_files = []
@@ -124,14 +168,11 @@ def upload():
             saved_files.append(info_name)
             saved_file_paths.append(info_path)
 
-        send_submission_email(first_name, last_name, email, saved_file_paths)
+        send_submission_email(form_data, saved_file_paths)
 
         return jsonify({
             "success": True,
             "message": "Submission received successfully.",
-            "firstName": first_name,
-            "lastName": last_name,
-            "email": email,
             "savedFiles": saved_files
         }), 200
 
