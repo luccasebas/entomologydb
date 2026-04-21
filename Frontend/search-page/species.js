@@ -8,6 +8,7 @@ const from = params.get('from');
 const breadcrumbEnabled = from === 'search' || from === 'species' || sessionStorage.getItem('breadcrumbActive') === 'true';
 const breadcrumbEl = document.getElementById('breadcrumb');
 const breadcrumbCurrentEl = document.getElementById('breadcrumb-current');
+let currentSpeciesData = null;
 
 // DOM references
 const titleEl = document.querySelector('.species-title');
@@ -75,6 +76,7 @@ async function loadSpecies() {
 }
 
 function renderSpecies(s) {
+  currentSpeciesData = s;
   // Hero
   titleEl.innerHTML = `<em>${escapeHtml(s.Full_name)}</em>`;
   if (s.Author) {
@@ -137,24 +139,143 @@ function renderImages(s) {
     source: img.source,
     copyright: img.copyright,
   }));
-  container.innerHTML = lightboxImages.map((img, idx) => `
-    <figure class="image-tile" data-img-index="${idx}">
-      <img src="${img.url}" alt="${escapeHtml(img.category)}" loading="lazy" onerror="this.src='./seed_beetle_logo_transparent.png'" />
-      <figcaption>
-        ${escapeHtml(img.category)}
-        ${img.copyright ? `<div class="image-credit">© ${escapeHtml(img.copyright)}</div>` : ''}
-        ${img.source ? `<div class="image-source">${escapeHtml(img.source)}</div>` : ''}
-      </figcaption>
-    </figure>
-  `).join('');
 
-  // Wire up click handlers
-  container.querySelectorAll('.image-tile').forEach((tile) => {
-    tile.addEventListener('click', () => {
-      const idx = parseInt(tile.dataset.imgIndex, 10);
-      openLightbox(idx);
+  if (tabbedView) {
+    renderImagesGrouped(container);
+  } else {
+    renderImagesHero(container);
+  }
+}
+
+function renderImagesHero(container) {
+  container.innerHTML = `
+    <div class="image-hero" data-img-index="0">
+      <img src="${lightboxImages[0].url}" alt="${escapeHtml(lightboxImages[0].category)}" loading="lazy" onerror="this.src='./seed_beetle_logo_transparent.png'" />
+      <div class="image-hero-caption">${escapeHtml(lightboxImages[0].category)}</div>
+    </div>
+    ${lightboxImages.length > 1 ? `
+      <div class="image-thumbstrip">
+        ${lightboxImages.map((img, idx) => `
+          <div class="image-thumb ${idx === 0 ? 'is-active' : ''}" data-img-index="${idx}">
+            <img src="${img.url}" alt="${escapeHtml(img.category)}" loading="lazy" onerror="this.src='./seed_beetle_logo_transparent.png'" />
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+
+  container.querySelectorAll('.image-thumb').forEach((thumb) => {
+    thumb.addEventListener('click', () => {
+      const idx = parseInt(thumb.dataset.imgIndex, 10);
+      const hero = container.querySelector('.image-hero');
+      const heroImg = hero.querySelector('img');
+      const heroCaption = hero.querySelector('.image-hero-caption');
+      hero.dataset.imgIndex = idx;
+      heroImg.src = lightboxImages[idx].url;
+      heroCaption.textContent = lightboxImages[idx].category;
+      container.querySelectorAll('.image-thumb').forEach((t) => t.classList.remove('is-active'));
+      thumb.classList.add('is-active');
     });
   });
+
+  container.querySelector('.image-hero').addEventListener('click', () => {
+    const idx = parseInt(container.querySelector('.image-hero').dataset.imgIndex, 10);
+    openLightbox(idx);
+  });
+}
+
+function renderImagesGrouped(container) {
+  const selectedAngles = new Set();
+
+  const getAngle = (category) => {
+    const parts = category.split(':');
+    return parts.length > 1 ? parts.slice(1).join(':').trim() : category.trim();
+  };
+
+  const angles = [...new Set(lightboxImages.map((img) => getAngle(img.category)))].sort();
+
+  function render() {
+    container.innerHTML = `
+      <div class="image-angle-controls">
+        <select id="angle-select">
+          <option value="">Add view filter...</option>
+          ${angles.map((a) => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('')}
+        </select>
+        <div id="angle-chips" class="chip-list"></div>
+      </div>
+      <div class="image-filtered-grid">
+        ${lightboxImages.map((img, idx) => `
+          <figure class="image-tile" data-img-index="${idx}" data-angle="${escapeHtml(getAngle(img.category))}">
+            <img src="${img.url}" alt="${escapeHtml(img.category)}" loading="lazy" onerror="this.src='./seed_beetle_logo_transparent.png'" />
+            <figcaption>${escapeHtml(getAngle(img.category))}</figcaption>
+          </figure>
+        `).join('')}
+      </div>
+    `;
+
+    const select = document.getElementById('angle-select');
+    select.addEventListener('change', () => {
+      if (!select.value) return;
+      selectedAngles.add(select.value);
+      select.value = '';
+      updateOptions();
+      renderChips();
+      applyFilter();
+    });
+
+    container.querySelectorAll('.image-tile').forEach((tile) => {
+      tile.addEventListener('click', () => {
+        openLightbox(parseInt(tile.dataset.imgIndex, 10));
+      });
+    });
+
+    renderChips();
+  }
+
+  function updateOptions() {
+    const select = document.getElementById('angle-select');
+    if (!select) return;
+    const options = select.querySelectorAll('option');
+    options.forEach((opt) => {
+      if (opt.value) {
+        opt.disabled = selectedAngles.has(opt.value);
+      }
+    });
+  }
+
+  function renderChips() {
+    const chipsContainer = document.getElementById('angle-chips');
+    if (!chipsContainer) return;
+    if (selectedAngles.size === 0) {
+      chipsContainer.innerHTML = '';
+      return;
+    }
+    chipsContainer.innerHTML = [...selectedAngles].map((angle) => `
+      <span class="chip">${escapeHtml(angle)}
+        <button type="button" class="chip-x" data-angle="${escapeHtml(angle)}">×</button>
+      </span>
+    `).join('');
+    chipsContainer.querySelectorAll('.chip-x').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        selectedAngles.delete(btn.dataset.angle);
+        updateOptions();
+        renderChips();
+        applyFilter();
+      });
+    });
+  }
+
+  function applyFilter() {
+    container.querySelectorAll('.image-tile').forEach((tile) => {
+      if (selectedAngles.size === 0 || selectedAngles.has(tile.dataset.angle)) {
+        tile.style.display = '';
+      } else {
+        tile.style.display = 'none';
+      }
+    });
+  }
+
+  render();
 }
 
 function openLightbox(index) {
@@ -308,22 +429,34 @@ document.addEventListener('keydown', (e) => {
 });
 
 function renderSpecimens(s) {
-  const tbody = document.querySelector('#specimens .data-table tbody');
-  if (!tbody) return;
+  const container = document.getElementById('specimen-list');
+  if (!container) return;
   if (!s.specimens.length) {
-    tbody.innerHTML = `<tr><td colspan="3" class="empty">No specimens recorded.</td></tr>`;
+    container.innerHTML = `<p class="empty">No specimens recorded.</p>`;
     return;
   }
-  tbody.innerHTML = s.specimens.map((sp) => `
-    <tr>
-      <td>${escapeHtml(sp.id)}</td>
-      <td>${escapeHtml(sp.stage_lot)}</td>
-      <td>${escapeHtml(sp.medium)}</td>
-      <td>${escapeHtml(sp.locality_with_date)}</td>
-    </tr>
-  `).join('');
 
-  tbody.querySelectorAll('.clickable-row').forEach((row) => {
+  // Add a count header
+  container.innerHTML = `
+    <div class="specimen-count">${s.specimens.length} specimen${s.specimens.length !== 1 ? 's' : ''} recorded</div>
+  ` + s.specimens.map((sp) => {
+    // Locality_with_date is the most meaningful field we have
+    const loc = sp.locality_with_date || 'Unknown locality';
+    // Stored (museum) is secondary info
+    const museum = sp.stored || '';
+
+    return `
+      <div class="specimen-row" data-href="./specimen.html?id=${encodeURIComponent(sp.id)}">
+        <div class="specimen-row-left">
+          <div class="specimen-row-main">${escapeHtml(loc)}</div>
+          ${museum ? `<div class="specimen-row-sub">${escapeHtml(museum)}</div>` : ''}
+        </div>
+        <span class="specimen-row-arrow">›</span>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.specimen-row').forEach((row) => {
     row.addEventListener('click', () => {
       window.location.href = row.dataset.href;
     });
@@ -543,40 +676,73 @@ function renderMap(s) {
       let events = [];
       try { events = JSON.parse(props.events); } catch {}
 
-      let popupHtml = `
+      const localityName = props.locality || '';
+      const matchingSpecimens = (currentSpeciesData?.specimens || []).filter((sp) =>
+        sp.locality_with_date && localityName && sp.locality_with_date.includes(localityName)
+      );
+
+      const popupHtml = `
         <div class="map-popup">
           <div class="popup-header">
             <strong>${escapeHtml(props.name)}</strong>
           </div>
           <div class="popup-stats">
             ${props.coordinates ? `<div class="popup-coords">${escapeHtml(props.coordinates)}</div>` : ''}
-            <div>${props.eventCount} collection event${props.eventCount !== 1 ? 's' : ''} · ${props.specimenCount} specimen${props.specimenCount !== 1 ? 's' : ''}</div>
+            <div>${props.eventCount} event${props.eventCount !== 1 ? 's' : ''} · ${matchingSpecimens.length} specimen${matchingSpecimens.length !== 1 ? 's' : ''}</div>
           </div>
+          ${matchingSpecimens.length > 0 ? `
+            <div class="popup-specimens">
+              <div class="popup-specimens-header">${matchingSpecimens.length} specimen${matchingSpecimens.length !== 1 ? 's' : ''}</div>
+              ${matchingSpecimens.map((sp) => `
+                <a class="popup-specimen-row" href="./specimen.html?id=${encodeURIComponent(sp.id)}">
+                  ${escapeHtml(sp.locality_with_date || 'Specimen')}
+                  <span class="popup-specimen-arrow">›</span>
+                </a>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
       `;
 
-      if (events.length > 0) {
-        popupHtml += `<div class="popup-events">`;
-        for (const ev of events.slice(0, 5)) {
-          popupHtml += `
-            <div class="popup-event-row">
-              <span class="popup-event-date">${escapeHtml(ev.date || 'No date')}</span>
-              <span class="popup-event-collector">${escapeHtml(ev.collector || '')}</span>
-              ${ev.elevation ? `<span class="popup-event-elev">${escapeHtml(ev.elevation)}</span>` : ''}
-            </div>
-          `;
-        }
-        if (events.length > 5) {
-          popupHtml += `<div class="popup-event-more">+ ${events.length - 5} more events</div>`;
-        }
-        popupHtml += `</div>`;
-      }
-
-      popupHtml += `</div>`;
-
-      new maplibregl.Popup({ maxWidth: '320px' })
+      const popup = new maplibregl.Popup({ maxWidth: '280px' })
         .setLngLat(coords)
         .setHTML(popupHtml)
         .addTo(mapInstance);
+
+      // Center the map on the clicked marker
+      mapInstance.flyTo({
+        center: coords,
+        duration: 300,
+      });
+
+      setTimeout(() => {
+        const popupEl = popup.getElement();
+        if (popupEl) {
+          const popupRect = popupEl.getBoundingClientRect();
+          const mapRect = mapInstance.getContainer().getBoundingClientRect();
+          
+          let offsetX = 0;
+          let offsetY = 0;
+          const padding = 20;
+
+          if (popupRect.top < mapRect.top + padding) {
+            offsetY = mapRect.top - popupRect.top + padding;
+          }
+          if (popupRect.bottom > mapRect.bottom - padding) {
+            offsetY = mapRect.bottom - popupRect.bottom - padding;
+          }
+          if (popupRect.left < mapRect.left + padding) {
+            offsetX = mapRect.left - popupRect.left + padding;
+          }
+          if (popupRect.right > mapRect.right - padding) {
+            offsetX = mapRect.right - popupRect.right - padding;
+          }
+
+          if (offsetX !== 0 || offsetY !== 0) {
+            mapInstance.panBy([-offsetX, -offsetY], { duration: 300 });
+          }
+        }
+      }, 50);
     });
 
     // Cursor changes
@@ -632,30 +798,118 @@ if (initialTab) {
   switchTab(initialTab, false);
 }
 
-// View toggle: tabbed vs full page
+// View toggle: columns vs tabs
 const viewToggle = document.getElementById('viewToggle');
-let showAll = false;
+let tabbedView = sessionStorage.getItem('speciesViewMode') === 'tabbed';
+
+function applyViewMode() {
+  const columns = document.querySelector('.species-columns');
+  const eventsSection = document.getElementById('events');
+  const tabsNav = document.querySelector('.species-tabs');
+
+  if (tabbedView) {
+    // Switch to single column, tabbed
+    if (columns) {
+      columns.style.display = 'block';
+      columns.classList.add('tabbed-mode');
+    }
+    if (tabsNav) tabsNav.style.display = '';
+
+    // Hide everything, show only active tab
+    const allPanels = document.querySelectorAll('.panel-card[id]');
+    allPanels.forEach((panel) => {
+      panel.style.display = 'none';
+    });
+
+    const currentTab = new URLSearchParams(window.location.search).get('tab') || 'taxon';
+    const activePanel = document.getElementById(currentTab);
+    if (activePanel) activePanel.style.display = '';
+
+    // Update tab buttons
+    document.querySelectorAll('.species-tabs .tab-btn').forEach((b) => {
+      b.classList.remove('is-active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    const activeBtn = document.querySelector(`.species-tabs .tab-btn[data-tab="${currentTab}"]`);
+    if (activeBtn) {
+      activeBtn.classList.add('is-active');
+      activeBtn.setAttribute('aria-selected', 'true');
+    }
+
+    // Hide column wrappers but keep panels accessible
+    document.querySelector('.species-col-left')?.style.setProperty('display', 'contents');
+    document.querySelector('.species-col-right')?.style.setProperty('display', 'contents');
+
+    if (currentSpeciesData) renderImages(currentSpeciesData);
+    if (viewToggle) viewToggle.textContent = 'Switch to overview';
+    if (currentTab === 'map-panel' && mapInstance) setTimeout(() => mapInstance.resize(), 100);
+  } else {
+    // Switch to two-column overview
+    if (columns) {
+      columns.style.display = '';
+      columns.classList.remove('tabbed-mode');
+    }
+    if (tabsNav) tabsNav.style.display = 'none';
+
+    // Show everything
+    document.querySelectorAll('.panel-card[id]').forEach((panel) => {
+      panel.style.display = '';
+    });
+
+    // Restore column wrappers
+    document.querySelector('.species-col-left')?.style.setProperty('display', '');
+    document.querySelector('.species-col-right')?.style.setProperty('display', '');
+
+    // Show events
+    if (eventsSection) eventsSection.style.display = '';
+
+    if (currentSpeciesData) renderImages(currentSpeciesData);
+    if (viewToggle) viewToggle.textContent = 'Switch to tabbed view';
+    if (mapInstance) setTimeout(() => mapInstance.resize(), 100);
+  }
+}
 
 if (viewToggle) {
   viewToggle.addEventListener('click', () => {
-    showAll = !showAll;
-    viewToggle.textContent = showAll ? 'Show tabs' : 'Show all sections';
-
-    if (showAll) {
-      document.querySelector('.tabs').style.display = 'none';
-      document.querySelectorAll('.tab-panel').forEach((panel) => {
-        panel.classList.add('show-all');
-      });
-      if (mapInstance) setTimeout(() => mapInstance.resize(), 200);
-    } else {
-      document.querySelector('.tabs').style.display = '';
-      document.querySelectorAll('.tab-panel').forEach((panel) => {
-        panel.classList.remove('show-all');
-      });
-      const currentTab = new URLSearchParams(window.location.search).get('tab') || 'taxon';
-      switchTab(currentTab, false);
-    }
+    tabbedView = !tabbedView;
+    sessionStorage.setItem('speciesViewMode', tabbedView ? 'tabbed' : 'columns');
+    applyViewMode();
   });
 }
+
+// Tab click handlers (work in tabbed mode)
+document.querySelectorAll('.species-tabs .tab-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (!tabbedView) return;
+    const target = btn.dataset.tab;
+
+    // Update buttons
+    document.querySelectorAll('.species-tabs .tab-btn').forEach((b) => {
+      b.classList.remove('is-active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('is-active');
+    btn.setAttribute('aria-selected', 'true');
+
+    // Hide all panels, show target
+    document.querySelectorAll('.panel-card[id]').forEach((panel) => {
+      panel.style.display = 'none';
+    });
+    const panel = document.getElementById(target);
+    if (panel) panel.style.display = '';
+
+    if (target === 'map-panel' && mapInstance) {
+      setTimeout(() => mapInstance.resize(), 50);
+    }
+
+    const url = new URL(window.location);
+    url.searchParams.set('tab', target);
+    history.replaceState(null, '', url);
+    sessionStorage.setItem('lastSpeciesTab:' + speciesId, target);
+  });
+});
+
+// Apply saved view mode
+applyViewMode();
 
 loadSpecies();
