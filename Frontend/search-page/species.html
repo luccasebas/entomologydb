@@ -37,125 +37,72 @@
   <main class="species-page">
 
     <div class="species-hero">
-      <h1 class="species-title">Acanthoscelides obtectus</h1>
-      <p class="species-subtitle">230 specimens documented</p>
+      <h1 class="species-title">Loading...</h1>
+      <p class="species-subtitle"></p>
+      <div class="view-toggle">
+        <button type="button" id="viewToggle" class="view-toggle-btn">Switch to tabbed view</button>
+      </div>
     </div>
 
-    <div class="view-toggle">
-      <button type="button" id="viewToggle" class="view-toggle-btn">Show all sections</button>
-    </div>
-
-    <nav class="tabs" aria-label="Species sections">
-      <button class="tab-btn is-active" data-tab="taxon" aria-selected="true" role="tab">
-        Taxonomic Information
-      </button>
-      <button class="tab-btn" data-tab="images" aria-selected="false" role="tab">
-        Images
-      </button>
-      <button class="tab-btn" data-tab="specimens" aria-selected="false" role="tab">
-        Specimens
-      </button>
-      <button class="tab-btn" data-tab="events" aria-selected="false" role="tab">
-        Events
-      </button>
-      <button class="tab-btn" data-tab="map" aria-selected="false" role="tab">
-        Map
-      </button>
+    <nav class="tabs species-tabs" aria-label="Species sections" style="display:none;">
+      <button class="tab-btn is-active" data-tab="taxon" aria-selected="true" role="tab">Taxonomy</button>
+      <button class="tab-btn" data-tab="images" aria-selected="false" role="tab">Images</button>
+      <button class="tab-btn" data-tab="specimens" aria-selected="false" role="tab">Specimens</button>
+      <button class="tab-btn" data-tab="events" aria-selected="false" role="tab">Events</button>
+      <button class="tab-btn" data-tab="map-panel" aria-selected="false" role="tab">Map</button>
     </nav>
 
-    <section class="tab-panel is-active" id="taxon" role="tabpanel">
-      <div class="panel-card">
-        <h2 class="panel-title">Taxonomic Information</h2>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">Kingdom</div>
-            <div class="info-value">Animalia</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Phylum</div>
-            <div class="info-value">Arthropoda</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Class</div>
-            <div class="info-value">Insecta</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Order</div>
-            <div class="info-value">Coleoptera</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Family</div>
-            <div class="info-value">Chrysomelidae</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Subfamily</div>
-            <div class="info-value">Bruchinae</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Genus</div>
-            <div class="info-value">Acanthoscelides</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Species</div>
-            <div class="info-value">obtectus</div>
-          </div>
+    <!-- Two-column layout -->
+    <div class="species-columns">
+
+      <!-- Left column: taxonomy + map -->
+      <div class="species-col-left">
+        <div class="panel-card" id="taxon">
+          <h2 class="panel-title">Taxonomic Information</h2>
+          <div class="info-grid"></div>
+        </div>
+
+        <div class="panel-card" id="map-panel">
+          <h2 class="panel-title">Locality Map</h2>
+          <div id="species-map"></div>
+          <p id="map-empty" style="display:none; color:#666; padding:20px;">No coordinates available for this species.</p>
         </div>
       </div>
-    </section>
 
-    <section class="tab-panel" id="images" role="tabpanel">
-      <div class="panel-card">
-        <h2 class="panel-title">Images</h2>
-        <div class="image-grid"></div>
-      </div>
-    </section>
+      <!-- Right column: images + specimens -->
+      <div class="species-col-right">
+        <div class="panel-card" id="images">
+          <h2 class="panel-title">Images</h2>
+          <div class="image-grid"></div>
+        </div>
 
-    <section class="tab-panel" id="specimens" role="tabpanel">
-      <div class="panel-card">
-        <h2 class="panel-title">Specimens</h2>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Stage / Lot</th>
-                <th>Medium</th>
-                <th>Locality</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+        <div class="panel-card" id="specimens">
+          <h2 class="panel-title">Specimens</h2>
+          <div class="specimen-list" id="specimen-list"></div>
         </div>
       </div>
-    </section>
 
-    <section class="tab-panel" id="events" role="tabpanel">
-      <div class="panel-card">
-        <h2 class="panel-title">Events</h2>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Country</th>
-                <th>Province</th>
-                <th>Locality</th>
-                <th>Elevation</th>
-                <th>Coordinates</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+    </div>
 
-    <section class="tab-panel" id="map" role="tabpanel">
-      <div class="panel-card">
-        <h2 class="panel-title">Locality Map</h2>
-        <div id="species-map" style="width: 100%; height: 500px; border-radius: 8px;"></div>
-        <p id="map-empty" style="display:none; color:#666; padding:20px;">No coordinates available for this species.</p>
+    <!-- Full-width section: events -->
+    <div class="panel-card" id="events" style="margin-top:24px;">
+      <h2 class="panel-title">Collection Events</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Country</th>
+              <th>Province</th>
+              <th>Locality</th>
+              <th>Elevation</th>
+              <th>Coordinates</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
-    </section>
+    </div>
 
   </main>
 
