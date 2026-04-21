@@ -85,6 +85,10 @@ function renderSpecies(s) {
   if (s.events.length) counts.push(`${s.events.length} events`);
   if (s.images.length) counts.push(`${s.images.length} images`);
   subtitleEl.textContent = counts.join(' · ') || 'No records';
+  const breadcrumbSpecies = document.getElementById('breadcrumb-species');
+  if (breadcrumbSpecies) breadcrumbSpecies.textContent = s.Full_name;
+  const breadcrumbNav = document.querySelector('.breadcrumbs');
+  if (breadcrumbNav) breadcrumbNav.style.visibility = 'visible';
 
   renderTaxonomy(s);
   renderImages(s);
@@ -307,26 +311,30 @@ function renderSpecimens(s) {
   const tbody = document.querySelector('#specimens .data-table tbody');
   if (!tbody) return;
   if (!s.specimens.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty">No specimens recorded.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" class="empty">No specimens recorded.</td></tr>`;
     return;
   }
   tbody.innerHTML = s.specimens.map((sp) => `
     <tr>
-      <td><a href="./specimen.html?id=${encodeURIComponent(sp.id)}&from=species" class="specimen-link">${escapeHtml(sp.id)}</a></td>
+      <td>${escapeHtml(sp.id)}</td>
       <td>${escapeHtml(sp.stage_lot)}</td>
-      <td></td>
       <td>${escapeHtml(sp.medium)}</td>
-      <td></td>
       <td>${escapeHtml(sp.locality_with_date)}</td>
     </tr>
   `).join('');
+
+  tbody.querySelectorAll('.clickable-row').forEach((row) => {
+    row.addEventListener('click', () => {
+      window.location.href = row.dataset.href;
+    });
+  });
 }
 
 function renderEvents(s) {
   const tbody = document.querySelector('#events .data-table tbody');
   if (!tbody) return;
   if (!s.events.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="empty">No collection events recorded.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="empty">No collection events recorded.</td></tr>`;
     return;
   }
   tbody.innerHTML = s.events.map((e) => `
@@ -337,7 +345,6 @@ function renderEvents(s) {
       <td>${escapeHtml(e.elevation)}</td>
       <td>${escapeHtml(e.coordinates)}</td>
       <td>${escapeHtml(e.date)}</td>
-      <td>${escapeHtml(e.collector)}</td>
     </tr>
   `).join('');
 }
@@ -349,7 +356,6 @@ function renderHosts(s) {
 let mapInstance = null;
 
 function parseDMS(coordString) {
-  // Parse strings like "10°12'N, 85°12'W" → { lat: 10.2, lng: -85.2 }
   if (!coordString) return null;
   const match = coordString.match(/(\d+)°(\d+)?'?([NS]),\s*(\d+)°(\d+)?'?([EW])/);
   if (!match) return null;
@@ -366,16 +372,52 @@ function renderMap(s) {
   const emptyMsg = document.getElementById('map-empty');
   if (!mapContainer) return;
 
-  const points = (s.geolib || [])
-    .map((g) => {
-      const parsed = parseDMS(g.coordinates);
-      if (!parsed) return null;
-      return {
+  // Build rich location data by joining geolib + events + specimens
+  const locationMap = {};
+
+  // Start with geolib (has coordinates)
+  for (const g of (s.geolib || [])) {
+    const parsed = parseDMS(g.coordinates);
+    if (!parsed) continue;
+    const key = [g.country, g.province, g.locality].filter(Boolean).join(', ');
+    if (!locationMap[key]) {
+      locationMap[key] = {
         ...parsed,
-        name: [g.country, g.province, g.locality].filter(Boolean).join(', '),
+        name: key,
+        country: g.country,
+        province: g.province,
+        locality: g.locality,
+        coordinates: g.coordinates,
+        events: [],
+        specimenCount: 0,
       };
-    })
-    .filter(Boolean);
+    }
+  }
+
+  // Attach events to locations by matching locality name
+  for (const e of (s.events || [])) {
+    const key = [e.country, e.province, e.locality].filter(Boolean).join(', ');
+    if (locationMap[key]) {
+      locationMap[key].events.push({
+        date: e.date,
+        collector: e.collector,
+        elevation: e.elevation,
+      });
+    }
+  }
+
+  // Count specimens per locality
+  for (const sp of (s.specimens || [])) {
+    const locStr = sp.locality_with_date || '';
+    for (const key of Object.keys(locationMap)) {
+      if (locStr.includes(locationMap[key].locality || '___NOMATCH___')) {
+        locationMap[key].specimenCount++;
+        break;
+      }
+    }
+  }
+
+  const points = Object.values(locationMap);
 
   if (points.length === 0) {
     mapContainer.style.display = 'none';
@@ -398,134 +440,222 @@ function renderMap(s) {
     zoom: 3,
   });
 
-  mapInstance.on('load', async () => {
-    // Load a custom red teardrop pin
-    const pinSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 36 48">
-      <path d="M18 0C8.06 0 0 8.06 0 18c0 13.5 18 30 18 30s18-16.5 18-30C36 8.06 27.94 0 18 0z" fill="#d9534f" stroke="#fff" stroke-width="2"/>
-      <circle cx="18" cy="18" r="7" fill="#fff"/>
-    </svg>`;
-    const pinImg = new Image(36, 48);
-    pinImg.onload = () => {
-      if (!mapInstance.hasImage('pin')) mapInstance.addImage('pin', pinImg);
-      addLayers();
+  mapInstance.on('load', () => {
+    const geojson = {
+      type: 'FeatureCollection',
+      features: points.map((p) => ({
+        type: 'Feature',
+        properties: {
+          name: p.name,
+          country: p.country,
+          province: p.province,
+          locality: p.locality,
+          coordinates: p.coordinates,
+          eventCount: p.events.length,
+          specimenCount: p.specimenCount,
+          events: JSON.stringify(p.events),
+        },
+        geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+      })),
     };
-    pinImg.src = 'data:image/svg+xml;base64,' + btoa(pinSvg);
 
-    function addLayers() {
-      const geojson = {
-        type: 'FeatureCollection',
-        features: points.map((p) => ({
-          type: 'Feature',
-          properties: { name: p.name },
-          geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-        })),
-      };
+    mapInstance.addSource('localities', {
+      type: 'geojson',
+      data: geojson,
+      cluster: true,
+      clusterMaxZoom: 6,
+      clusterRadius: 40,
+    });
 
-      mapInstance.addSource('localities', {
-        type: 'geojson',
-        data: geojson,
-        cluster: true,
-        clusterMaxZoom: 6,
-        clusterRadius: 40,
-      });
+    // Cluster bubbles
+    mapInstance.addLayer({
+      id: 'clusters',
+      type: 'circle',
+      source: 'localities',
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': '#d9534f',
+        'circle-radius': [
+          'step', ['get', 'point_count'],
+          18, 5,
+          24, 15,
+          30,
+        ],
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#fff',
+      },
+    });
 
-      // Cluster bubbles (red circles)
-      mapInstance.addLayer({
-        id: 'clusters',
-        type: 'circle',
-        source: 'localities',
-        filter: ['has', 'point_count'],
-        paint: {
-          'circle-color': '#d9534f',
-          'circle-radius': [
-            'step', ['get', 'point_count'],
-            18, 5,
-            24, 15,
-            30,
-          ],
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#fff',
-        },
-      });
+    // Cluster count labels
+    mapInstance.addLayer({
+      id: 'cluster-count',
+      type: 'symbol',
+      source: 'localities',
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': '{point_count_abbreviated}',
+        'text-font': ['Noto Sans Regular'],
+        'text-size': 14,
+        'text-allow-overlap': true,
+      },
+      paint: { 'text-color': '#fff' },
+    });
 
-      // Cluster count labels
-      mapInstance.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'localities',
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-field': '{point_count_abbreviated}',
-          'text-font': ['Noto Sans Regular'],
-          'text-size': 14,
-          'text-allow-overlap': true,
-        },
-        paint: { 'text-color': '#fff' },
-      });
+    // Individual pins
+    mapInstance.addLayer({
+      id: 'unclustered-point',
+      type: 'circle',
+      source: 'localities',
+      filter: ['!', ['has', 'point_count']],
+      paint: {
+        'circle-color': '#d9534f',
+        'circle-radius': 8,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#fff',
+      },
+    });
 
-      // Individual unclustered pins
-      mapInstance.addLayer({
-        id: 'unclustered-point',
-        type: 'symbol',
-        source: 'localities',
-        filter: ['!', ['has', 'point_count']],
-        layout: {
-          'icon-image': 'pin',
-          'icon-size': 1,
-          'icon-anchor': 'bottom',
-          'icon-allow-overlap': true,
-        },
-      });
-
-      // Click handlers
-      mapInstance.on('click', 'clusters', (e) => {
-        const features = mapInstance.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-        const clusterId = features[0].properties.cluster_id;
-        mapInstance.getSource('localities').getClusterExpansionZoom(clusterId, (err, zoom) => {
-          if (err) return;
-          mapInstance.easeTo({ center: features[0].geometry.coordinates, zoom });
-        });
-      });
-
-      mapInstance.on('click', 'unclustered-point', (e) => {
-        const coords = e.features[0].geometry.coordinates.slice();
-        const name = e.features[0].properties.name;
-        new maplibregl.Popup().setLngLat(coords).setText(name).addTo(mapInstance);
-      });
-
-      mapInstance.on('mouseenter', 'clusters', () => mapInstance.getCanvas().style.cursor = 'pointer');
-      mapInstance.on('mouseleave', 'clusters', () => mapInstance.getCanvas().style.cursor = '');
-      mapInstance.on('mouseenter', 'unclustered-point', () => mapInstance.getCanvas().style.cursor = 'pointer');
-      mapInstance.on('mouseleave', 'unclustered-point', () => mapInstance.getCanvas().style.cursor = '');
-
-      if (points.length > 1) {
+    // Click cluster to zoom and fit all children
+    mapInstance.on('click', 'clusters', (e) => {
+      const features = mapInstance.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+      const clusterId = features[0].properties.cluster_id;
+      const source = mapInstance.getSource('localities');
+      source.getClusterLeaves(clusterId, 100, 0, (err, leaves) => {
+        if (err || !leaves || leaves.length === 0) {
+          source.getClusterExpansionZoom(clusterId, (err2, zoom) => {
+            if (err2) return;
+            mapInstance.easeTo({ center: features[0].geometry.coordinates, zoom });
+          });
+          return;
+        }
         const bounds = new maplibregl.LngLatBounds();
-        for (const p of points) bounds.extend([p.lng, p.lat]);
-        mapInstance.fitBounds(bounds, { padding: 50, maxZoom: 6 });
+        for (const leaf of leaves) {
+          bounds.extend(leaf.geometry.coordinates);
+        }
+        mapInstance.fitBounds(bounds, { padding: 60, maxZoom: 12 });
+      });
+    });
+
+    // Click individual marker to show rich popup
+    mapInstance.on('click', 'unclustered-point', (e) => {
+      const props = e.features[0].properties;
+      const coords = e.features[0].geometry.coordinates.slice();
+      let events = [];
+      try { events = JSON.parse(props.events); } catch {}
+
+      let popupHtml = `
+        <div class="map-popup">
+          <div class="popup-header">
+            <strong>${escapeHtml(props.name)}</strong>
+          </div>
+          <div class="popup-stats">
+            ${props.coordinates ? `<div class="popup-coords">${escapeHtml(props.coordinates)}</div>` : ''}
+            <div>${props.eventCount} collection event${props.eventCount !== 1 ? 's' : ''} · ${props.specimenCount} specimen${props.specimenCount !== 1 ? 's' : ''}</div>
+          </div>
+      `;
+
+      if (events.length > 0) {
+        popupHtml += `<div class="popup-events">`;
+        for (const ev of events.slice(0, 5)) {
+          popupHtml += `
+            <div class="popup-event-row">
+              <span class="popup-event-date">${escapeHtml(ev.date || 'No date')}</span>
+              <span class="popup-event-collector">${escapeHtml(ev.collector || '')}</span>
+              ${ev.elevation ? `<span class="popup-event-elev">${escapeHtml(ev.elevation)}</span>` : ''}
+            </div>
+          `;
+        }
+        if (events.length > 5) {
+          popupHtml += `<div class="popup-event-more">+ ${events.length - 5} more events</div>`;
+        }
+        popupHtml += `</div>`;
       }
+
+      popupHtml += `</div>`;
+
+      new maplibregl.Popup({ maxWidth: '320px' })
+        .setLngLat(coords)
+        .setHTML(popupHtml)
+        .addTo(mapInstance);
+    });
+
+    // Cursor changes
+    mapInstance.on('mouseenter', 'clusters', () => mapInstance.getCanvas().style.cursor = 'pointer');
+    mapInstance.on('mouseleave', 'clusters', () => mapInstance.getCanvas().style.cursor = '');
+    mapInstance.on('mouseenter', 'unclustered-point', () => mapInstance.getCanvas().style.cursor = 'pointer');
+    mapInstance.on('mouseleave', 'unclustered-point', () => mapInstance.getCanvas().style.cursor = '');
+
+    // Fit bounds
+    if (points.length > 1) {
+      const bounds = new maplibregl.LngLatBounds();
+      for (const p of points) bounds.extend([p.lng, p.lat]);
+      mapInstance.fitBounds(bounds, { padding: 50, maxZoom: 6 });
     }
   });
 }
 
-// Tab switcher (kept from your existing code)
-document.querySelectorAll(".tab-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.tab;
-    document.querySelectorAll(".tab-btn").forEach((b) => {
-      b.classList.remove("is-active");
-      b.setAttribute("aria-selected", "false");
-    });
+function switchTab(tabName, pushState = true) {
+  document.querySelectorAll(".tab-btn").forEach((b) => {
+    b.classList.remove("is-active");
+    b.setAttribute("aria-selected", "false");
+  });
+  document.querySelectorAll(".tab-panel").forEach((panel) => {
+    panel.classList.remove("is-active");
+  });
+  const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+  const panel = document.getElementById(tabName);
+  if (btn) {
     btn.classList.add("is-active");
     btn.setAttribute("aria-selected", "true");
-    document.querySelectorAll(".tab-panel").forEach((panel) => {
-      panel.classList.remove("is-active");
-    });
-    document.getElementById(target).classList.add("is-active");
-    // Map needs a resize when its container becomes visible
-    if (target === 'map' && mapInstance) {
-      setTimeout(() => mapInstance.resize(), 50);
-    }
+  }
+  if (panel) panel.classList.add("is-active");
+  if (tabName === 'map' && mapInstance) {
+    setTimeout(() => mapInstance.resize(), 50);
+  }
+  if (pushState) {
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tabName);
+    history.replaceState(null, '', url);
+    sessionStorage.setItem('lastSpeciesTab:' + speciesId, tabName);
+  }
+}
+
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    switchTab(btn.dataset.tab);
   });
 });
+
+// Restore tab from URL on load
+const initialTab = new URLSearchParams(window.location.search).get('tab');
+if (initialTab) {
+  switchTab(initialTab, false);
+}
+
+// View toggle: tabbed vs full page
+const viewToggle = document.getElementById('viewToggle');
+let showAll = false;
+
+if (viewToggle) {
+  viewToggle.addEventListener('click', () => {
+    showAll = !showAll;
+    viewToggle.textContent = showAll ? 'Show tabs' : 'Show all sections';
+
+    if (showAll) {
+      document.querySelector('.tabs').style.display = 'none';
+      document.querySelectorAll('.tab-panel').forEach((panel) => {
+        panel.classList.add('show-all');
+      });
+      if (mapInstance) setTimeout(() => mapInstance.resize(), 200);
+    } else {
+      document.querySelector('.tabs').style.display = '';
+      document.querySelectorAll('.tab-panel').forEach((panel) => {
+        panel.classList.remove('show-all');
+      });
+      const currentTab = new URLSearchParams(window.location.search).get('tab') || 'taxon';
+      switchTab(currentTab, false);
+    }
+  });
+}
 
 loadSpecies();

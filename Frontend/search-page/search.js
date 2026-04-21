@@ -283,8 +283,83 @@ async function updateBanner() {
 
 
 // ============================================================
-// GATHER FILTER VALUES
+// URL STATE
 // ============================================================
+
+function filtersToUrl() {
+  const url = new URL(window.location);
+  // Tribe
+  if (tribeSelect?.value) url.searchParams.set('tribe', tribeSelect.value);
+  else url.searchParams.delete('tribe');
+  // Countries
+  if (selectedCountries.size > 0) url.searchParams.set('countries', [...selectedCountries].join('|'));
+  else url.searchParams.delete('countries');
+  // Provinces
+  if (selectedProvinces.size > 0) url.searchParams.set('provinces', [...selectedProvinces].join('|'));
+  else url.searchParams.delete('provinces');
+  // Localities
+  if (selectedLocalities.size > 0) url.searchParams.set('localities', [...selectedLocalities].join('|'));
+  else url.searchParams.delete('localities');
+  // Species chips
+  if (selectedSpeciesIds.size > 0) url.searchParams.set('species', [...selectedSpeciesIds].join('|'));
+  else url.searchParams.delete('species');
+  // Page
+  url.searchParams.set('page', String(currentPage));
+  // Sort
+  const sortSelect = document.getElementById('sortSelect');
+  if (sortSelect?.value && sortSelect.value !== 'az') url.searchParams.set('sort', sortSelect.value);
+  else url.searchParams.delete('sort');
+
+  history.replaceState(null, '', url);
+}
+
+function filtersFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+
+  // Tribe
+  const tribe = params.get('tribe');
+  if (tribe && tribeSelect) tribeSelect.value = tribe;
+
+  // Countries
+  const countries = params.get('countries');
+  if (countries) {
+    countries.split('|').forEach((c) => selectedCountries.add(c));
+    const countryChipsEl = document.getElementById('country-chips');
+    if (countryChipsEl) renderChipList(countryChipsEl, selectedCountries);
+  }
+
+  // Provinces
+  const provinces = params.get('provinces');
+  if (provinces) {
+    provinces.split('|').forEach((p) => selectedProvinces.add(p));
+    const provinceChipsEl = document.getElementById('province-chips');
+    if (provinceChipsEl) renderChipList(provinceChipsEl, selectedProvinces);
+  }
+
+  // Localities
+  const localities = params.get('localities');
+  if (localities) {
+    localities.split('|').forEach((l) => selectedLocalities.add(l));
+    const localityChipsEl = document.getElementById('locality-chips');
+    if (localityChipsEl) renderChipList(localityChipsEl, selectedLocalities);
+  }
+
+  // Species chips
+  const species = params.get('species');
+  if (species) {
+    species.split('|').forEach((id) => selectedSpeciesIds.add(id));
+    renderChips();
+  }
+
+  // Page
+  const page = parseInt(params.get('page'), 10);
+  if (page && page > 0) currentPage = page;
+
+  // Sort
+  const sort = params.get('sort');
+  const sortSelect = document.getElementById('sortSelect');
+  if (sort && sortSelect) sortSelect.value = sort;
+}
 
 function getFilters() {
   const filters = {
@@ -327,21 +402,19 @@ function renderCards(species) {
   }
 
   cardsGrid.innerHTML = species.map((s) => `
-    <article class="species-card">
+    <a class="species-card" href="./species.html?id=${encodeURIComponent(s.Species_ID)}">
       <div class="species-info">
         <h3><em>${escapeHtml(s.Genus)} ${escapeHtml(s.Species)}</em></h3>
         <p class="card-meta">
-          Family Chrysomelidae · Subfamily Bruchinae${s.Tribe ? ` · ${escapeHtml(s.Tribe)}` : ''}
+          Subfamily Bruchinae${s.Tribe ? ` · ${escapeHtml(s.Tribe)}` : ''}
         </p>
-        <a class="learn-more" href="./species.html?id=${encodeURIComponent(s.Species_ID)}&from=search">Learn More →</a>
-      </div>
+        <span class="learn-more">Learn More →</span>      </div>
       <img
         class="species-img"
-        src="${s.image_url ? escapeHtml(s.image_url) : './seed_beetle_logo_transparent.png'}"
+        src="./seed_beetle_logo_transparent.png"
         alt="${escapeHtml(s.Full_name)}"
-        onerror="this.src='./seed_beetle_logo_transparent.png'"
       />
-    </article>
+    </a>
   `).join('');
 }
 
@@ -382,7 +455,8 @@ async function runSearch(useCache = false) {
       try {
         const parsed = JSON.parse(cached);
         lastResults = parsed.results;
-        currentPage = parsed.page || 1;
+        currentPage = parsed.page || currentPage;
+        applySortToResults();
         if (resultsCount) {
           resultsCount.textContent = `${lastResults.length} result${lastResults.length === 1 ? '' : 's'}`;
         }
@@ -397,6 +471,7 @@ async function runSearch(useCache = false) {
     const results = await searchSpecies(filters);
     lastResults = results;
     currentPage = 1;
+    applySortToResults();
 
     // Cache results
     sessionStorage.setItem('search:' + cacheKey, JSON.stringify({
@@ -414,6 +489,19 @@ async function runSearch(useCache = false) {
   }
 }
 
+function applySortToResults() {
+  const sortSelect = document.getElementById('sortSelect');
+  if (!sortSelect || !lastResults) return;
+  const mode = sortSelect.value;
+  lastResults.sort((a, b) => {
+    if (mode === 'az') return a.Full_name.localeCompare(b.Full_name);
+    if (mode === 'za') return b.Full_name.localeCompare(a.Full_name);
+    if (mode === 'newest') return (parseInt(b.Year) || 0) - (parseInt(a.Year) || 0);
+    if (mode === 'oldest') return (parseInt(a.Year) || 0) - (parseInt(b.Year) || 0);
+    return 0;
+  });
+}
+
 function renderPage() {
   const totalPages = Math.max(1, Math.ceil(lastResults.length / PAGE_SIZE));
   if (currentPage > totalPages) currentPage = totalPages;
@@ -424,7 +512,10 @@ function renderPage() {
   renderCards(pageItems);
   renderPagination(totalPages);
 
-  // Save current page back to cache so navigation preserves it
+  // Update URL with current state
+  filtersToUrl();
+
+  // Save current page back to cache
   const filters = getFilters();
   const cacheKey = getFilterCacheKey(filters);
   const existing = sessionStorage.getItem('search:' + cacheKey);
@@ -451,7 +542,6 @@ function renderPagination(totalPages) {
     return;
   }
 
-  // Build a sensible page list: first, last, current ± 2, with ellipses for gaps
   const pages = new Set();
   pages.add(1);
   pages.add(totalPages);
@@ -465,7 +555,7 @@ function renderPagination(totalPages) {
 
   let prev = 0;
   for (const p of sorted) {
-    if (p - prev > 1) html += `<span class="page-ellipsis">…</span>`;
+    if (p - prev > 1) html += `<span class="page-ellipsis">...</span>`;
     html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
     prev = p;
   }
@@ -493,7 +583,10 @@ function renderPagination(totalPages) {
 // ============================================================
 
 if (searchBtn) {
-  searchBtn.addEventListener('click', () => runSearch());
+  searchBtn.addEventListener('click', () => {
+    currentPage = 1;
+    runSearch();
+  });
 }
 
 if (resetBtn) {
@@ -501,32 +594,41 @@ if (resetBtn) {
     if (sciNameInput) sciNameInput.value = '';
     selectedSpeciesIds.clear();
     renderChips();
+    selectedCountries.clear();
+    selectedProvinces.clear();
+    selectedLocalities.clear();
+    const countryChipsEl = document.getElementById('country-chips');
+    const provinceChipsEl = document.getElementById('province-chips');
+    const localityChipsEl = document.getElementById('locality-chips');
+    if (countryChipsEl) renderChipList(countryChipsEl, selectedCountries);
+    if (provinceChipsEl) renderChipList(provinceChipsEl, selectedProvinces);
+    if (localityChipsEl) renderChipList(localityChipsEl, selectedLocalities);
     if (countryInput) countryInput.value = '';
+    if (provinceInput) provinceInput.value = '';
+    if (localityInput) localityInput.value = '';
     if (tribeSelect) tribeSelect.value = '';
     if (imagesOnlyCheckbox) imagesOnlyCheckbox.checked = false;
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) sortSelect.value = 'az';
+    currentPage = 1;
+    // Clear URL params
+    history.replaceState(null, '', window.location.pathname);
     runSearch();
   });
 }
-
-// Initial load
-updateBanner();
-runSearch(true);  // try cache first
-
 
 // Sort dropdown
 const sortSelect = document.getElementById('sortSelect');
 if (sortSelect) {
   sortSelect.addEventListener('change', () => {
     if (!lastResults || lastResults.length === 0) return;
-    const mode = sortSelect.value;
-    lastResults.sort((a, b) => {
-      if (mode === 'az') return a.Full_name.localeCompare(b.Full_name);
-      if (mode === 'za') return b.Full_name.localeCompare(a.Full_name);
-      if (mode === 'newest') return (parseInt(b.Year) || 0) - (parseInt(a.Year) || 0);
-      if (mode === 'oldest') return (parseInt(a.Year) || 0) - (parseInt(b.Year) || 0);
-      return 0;
-    });
+    applySortToResults();
     currentPage = 1;
     renderPage();
   });
 }
+
+// Restore state from URL, then run search
+filtersFromUrl();
+updateBanner();
+runSearch(true);
