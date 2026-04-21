@@ -8,6 +8,7 @@ import {
   TRIBES,
 } from '../shared/bruchindb-api.js';
 
+sessionStorage.removeItem('breadcrumbActive');
 
 // ============================================================
 // ELEMENT REFERENCES
@@ -332,7 +333,7 @@ function renderCards(species) {
         <p class="card-meta">
           Family Chrysomelidae · Subfamily Bruchinae${s.Tribe ? ` · ${escapeHtml(s.Tribe)}` : ''}
         </p>
-        <a class="learn-more" href="./species.html?id=${encodeURIComponent(s.Species_ID)}">Learn More →</a>
+        <a class="learn-more" href="./species.html?id=${encodeURIComponent(s.Species_ID)}&from=search">Learn More →</a>
       </div>
       <img
         class="species-img"

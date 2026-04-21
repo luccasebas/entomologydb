@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Specimen | BruchinDB</title>
+
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+
+  <header class="species-topbar">
+    <a class="species-topbar-link" href="./species.html">
+      ← Back to Species
+    </a>
+    <div class="species-topbar-spacer"></div>
+  </header>
+
+  <main class="species-page">
+
+    <nav class="breadcrumb-bar" id="breadcrumb" aria-label="Breadcrumb" hidden>
+      <a class="breadcrumb-link" href="./index.html">Search</a>
+      <span class="breadcrumb-separator">›</span>
+      <a class="breadcrumb-link" id="breadcrumb-species-link" href="./species.html">Species</a>
+      <span class="breadcrumb-separator">›</span>
+      <span class="breadcrumb-current" id="breadcrumb-current">Specimen</span>
+    </nav>
+
+    <!-- Centered specimen title -->
+    <div class="species-hero">
+      <h1 class="species-title">Specimen BRU-000123</h1>
+      <p class="species-subtitle">Acanthoscelides obtectus</p>
+    </div>
+
+    <!-- Tabs -->
+    <nav class="tabs" aria-label="Specimen sections">
+      <button class="tab-btn is-active" data-tab="specimen-info" aria-selected="true" role="tab">
+        Specimen Information
+      </button>
+      <button class="tab-btn" data-tab="images" aria-selected="false" role="tab">
+        Images
+      </button>
+      <button class="tab-btn" data-tab="collection-event" aria-selected="false" role="tab">
+        Collection Event
+      </button>
+      <button class="tab-btn" data-tab="host" aria-selected="false" role="tab">
+        Host Plant
+      </button>
+    </nav>
+
+    <!-- Specimen Info Tab -->
+    <section class="tab-panel is-active" id="specimen-info" role="tabpanel">
+      <div class="panel-card">
+        <h2 class="panel-title">Specimen Information</h2>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Specimen ID</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Species</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Sex</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Stage</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Collecting Method</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Determined By</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Medium</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Stored</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Tape</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Notes</div>
+            <div class="info-value"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Images Tab -->
+    <section class="tab-panel" id="images" role="tabpanel">
+      <div class="panel-card">
+        <h2 class="panel-title">Images</h2>
+
+        <div class="image-grid">
+          <figure class="image-tile">
+            <img src="./seed_beetle_logo_transparent.png" alt="Default beetle placeholder" />
+            <figcaption>Placeholder image</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Collection Event Tab -->
+    <section class="tab-panel" id="collection-event" role="tabpanel">
+      <div class="panel-card">
+        <h2 class="panel-title">Collection Event</h2>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Country</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Province</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">County</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Locality</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Date</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Collector</div>
+            <div class="info-value"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Host Plant Tab -->
+    <section class="tab-panel" id="host" role="tabpanel">
+      <div class="panel-card">
+        <h2 class="panel-title">Host Plant</h2>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Host Species</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Host Family</div>
+            <div class="info-value"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Citation</div>
+            <div class="info-value"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="./specimen.js"></script>
+</body>
+</html>

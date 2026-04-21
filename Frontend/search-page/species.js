@@ -4,6 +4,10 @@ import { CONFIG } from '../shared/config.js';
 // Get species ID from URL
 const params = new URLSearchParams(window.location.search);
 const speciesId = params.get('id');
+const from = params.get('from');
+const breadcrumbEnabled = from === 'search' || from === 'species' || sessionStorage.getItem('breadcrumbActive') === 'true';
+const breadcrumbEl = document.getElementById('breadcrumb');
+const breadcrumbCurrentEl = document.getElementById('breadcrumb-current');
 
 // DOM references
 const titleEl = document.querySelector('.species-title');
@@ -16,6 +20,17 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function showBreadcrumb() {
+  if (!breadcrumbEl) return;
+  breadcrumbEl.hidden = false;
+}
+
+function renderSpeciesBreadcrumb(s) {
+  if (!breadcrumbCurrentEl) return;
+  breadcrumbCurrentEl.textContent = s.Full_name;
+  showBreadcrumb();
 }
 
 async function loadSpecies() {
@@ -48,6 +63,9 @@ async function loadSpecies() {
       subtitleEl.textContent = `ID: ${speciesId}`;
       return;
     }
+    if (breadcrumbEnabled && (from === 'search' || from === 'species')) {
+      sessionStorage.setItem('breadcrumbActive', 'true');
+    }
     renderSpecies(species);
   } catch (err) {
     console.error('Failed to load species:', err);
@@ -74,6 +92,9 @@ function renderSpecies(s) {
   renderEvents(s);
   renderHosts(s);
   renderMap(s);
+  if (breadcrumbEnabled) {
+    renderSpeciesBreadcrumb(s);
+  }
 }
 
 function renderTaxonomy(s) {
@@ -291,7 +312,7 @@ function renderSpecimens(s) {
   }
   tbody.innerHTML = s.specimens.map((sp) => `
     <tr>
-      <td>${escapeHtml(sp.id)}</td>
+      <td><a href="./specimen.html?id=${encodeURIComponent(sp.id)}&from=species" class="specimen-link">${escapeHtml(sp.id)}</a></td>
       <td>${escapeHtml(sp.stage_lot)}</td>
       <td></td>
       <td>${escapeHtml(sp.medium)}</td>
