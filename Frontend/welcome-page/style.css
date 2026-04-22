@@ -122,7 +122,7 @@ h1{
 
 .welcome-page{
   position:relative;
-  min-height:calc(100vh - 76px);
+  min-height:100vh;
   background:#ffffff;
   isolation:isolate;
 }
@@ -233,7 +233,7 @@ h1{
 .welcome-hero{
   position:relative;
   z-index:2;
-  min-height:calc(100vh - 76px);
+  min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
