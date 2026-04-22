@@ -277,11 +277,6 @@ body{
   font-size:16px;
 }
 
-#species-map {
-  width: 100%;
-  height: 500px;
-  border-radius: 8px;
-}
 
 .breadcrumb-bar{
   display:flex;
@@ -1064,11 +1059,6 @@ a.species-card:hover {
   min-width: 0;
 }
 
-#species-map {
-  width: 100%;
-  height: 500px;
-  border-radius: 8px;
-}
 
 /* Specimen list (replaces table for cleaner look) */
 .specimen-list {
@@ -1080,10 +1070,18 @@ a.species-card:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
+  padding: 6px 14px;
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
   transition: background 0.1s ease;
+}
+
+.specimen-row-main {
+  font-size: 13px;
+}
+
+.specimen-row-sub {
+  font-size: 11px;
 }
 
 .specimen-row:hover {
@@ -1148,7 +1146,7 @@ a.species-card:hover {
 
 .image-hero img {
   width: 100%;
-  max-height: 320px;
+  max-height: 240px;
   object-fit: contain;
   border-radius: 8px 8px 0 0;
   background: #fafafa;
@@ -1435,4 +1433,226 @@ a.species-card:hover {
   color: #76b476;
   font-weight: 700;
   font-size: 14px;
+}
+
+.species-page {
+  padding-bottom: 80px;
+}
+
+.species-page .panel-card {
+  margin-bottom: 24px;
+}
+
+.species-columns .panel-card {
+  height: 460px;
+  overflow: hidden;
+}
+
+#specimens,
+#map-panel {
+  height: 580px;
+  overflow: hidden;
+}
+
+#species-map {
+  width: 100%;
+  height: 500px;
+  border-radius: 8px;
+}
+
+#map-panel .maplibregl-popup {
+  z-index: 10;
+}
+
+.specimen-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #eee;
+}
+
+.spec-page-btn {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.spec-page-btn:hover:not(:disabled) {
+  background: #f0f7f0;
+  border-color: #76b476;
+}
+
+.spec-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.spec-page-info {
+  font-size: 13px;
+  color: #888;
+}
+
+.specimen-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+}
+
+.specimen-filter {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.specimen-count {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.specimen-dropdown {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 12px;
+  background: white;
+  cursor: pointer;
+  max-width: 180px;
+}
+
+.specimen-count-label {
+  font-size: 12px;
+  color: #888;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.clear-map-filter {
+  background: #d9534f;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.clear-map-filter:hover {
+  background: #c9302c;
+}
+
+.specimen-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.specimen-chips .chip {
+  background: #76b476;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.specimen-chips .chip-x {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.map-chip {
+  background: #d9534f !important;
+}
+
+.map-custom-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-ctrl-btn {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.map-ctrl-btn:hover {
+  background: #f5f5f5;
+}
+
+.map-ctrl-btn.active {
+  background: #76b476;
+  color: white;
+  border-color: #76b476;
+}
+
+.specimen-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.specimen-toggle input {
+  margin: 0;
+  cursor: pointer;
+}
+
+.year-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.year-input {
+  width: 70px;
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.year-range span {
+  color: #888;
+  font-size: 12px;
 }
