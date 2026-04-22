@@ -114,6 +114,46 @@ async function getAllowedImageUrls(speciesId: string): Promise<string[] | null> 
     .filter((url: string) => url && url.length > 0);
 }
 
+async function getAllowedSpecimenImageUrls(specimenId: string): Promise<string[] | null> {
+  const token = await getFmToken('Specimen');
+
+  // 1. Fetch the specimen record
+  const res = await fetch(
+    `${FM_URL}/fmi/data/v2/databases/Specimen/layouts/Specimen record/_find`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: [{ Specimen_ID: `==${specimenId}` }],
+        limit: 1,
+      }),
+    }
+  );
+
+  if (!res.ok) return null;
+  const data = await res.json();
+  const record = data?.response?.data?.[0];
+  if (!record) return null;
+
+  // 2. Get the species this specimen belongs to
+  const speciesId = record.fieldData?.Species_ID;
+  if (!speciesId) return null;
+
+  // 3. Verify the species is in our allowlist (reuses the existing species check)
+  // This confirms validity + allowed genus, protecting host plant specimens automatically
+  const species = await getAllowedImageUrls(speciesId);
+  if (species === null) return null;
+
+  // 4. Extract image URLs from the specimen's own Related_images portal
+  const images = record.portalData?.Related_images || [];
+  return images
+    .map((img: any) => img['Related_images::image_container'])
+    .filter((url: string) => url && url.length > 0);
+}
+
 // Stream an image from FileMaker, handling the session-cookie redirect flow
 async function streamImage(imgUrl: string): Promise<Response> {
   // Step 1: GET the URL, do NOT auto-follow redirects yet — we need to capture the cookie
@@ -205,8 +245,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // NEW: handle image proxy requests
-    // Format: /fm-proxy/image/{species_id}/{index}
+    // Image proxy requests
+    // Species: /fm-proxy/image/{species_id}/{index}
+    // Specimen: /fm-proxy/image/specimen/{specimen_id}/{index}
     if (pathParts.startsWith('image/')) {
       const segments = pathParts.split('/');
       if (segments.length < 3) {
@@ -215,10 +256,28 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      const speciesId = segments[1];
-      const index = parseInt(segments[2], 10);
 
-      const imageUrls = await getAllowedImageUrls(speciesId);
+      let imageUrls: string[] | null;
+      let index: number;
+
+      if (segments[1] === 'specimen') {
+        // /image/specimen/{specimen_id}/{index}
+        if (segments.length < 4) {
+          return new Response(JSON.stringify({ error: 'Bad specimen image path' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        const specimenId = segments[2];
+        index = parseInt(segments[3], 10);
+        imageUrls = await getAllowedSpecimenImageUrls(specimenId);
+      } else {
+        // /image/{species_id}/{index}
+        const speciesId = segments[1];
+        index = parseInt(segments[2], 10);
+        imageUrls = await getAllowedImageUrls(speciesId);
+      }
+
       if (!imageUrls) {
         return new Response(JSON.stringify({ error: 'Forbidden or not found' }), {
           status: 403,

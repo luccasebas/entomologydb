@@ -188,8 +188,8 @@ body{
 .results-panel{
   flex:1;
   padding:40px;
+  min-width:0;
 }
-
 .results-placeholder{
   background:white;
   padding:30px;
@@ -200,8 +200,9 @@ body{
 /* Cards grid on the right */
 .cards-grid{
   display:grid;
-  grid-template-columns:repeat(2, minmax(280px, 1fr));
+  grid-template-columns:repeat(2, 1fr);
   gap:26px;
+  width:100%;
 }
 
 /* Individual species card */
@@ -253,30 +254,8 @@ body{
 
 /* ---------- Species Page ---------- */
 
-.species-topbar{
-  height:64px;
-  background:#76b476;
-  display:flex;
-  align-items:center;
-  padding:0 24px;
-}
-
-.species-topbar-link{
-  color:white;
-  text-decoration:none;
-  font-weight:700;
-}
-
-.species-topbar-link:hover{
-  text-decoration:underline;
-}
-
-.species-topbar-spacer{
-  flex:1;
-}
-
 .species-page{
-  max-width:1100px;
+  max-width:1300px;
   margin:28px auto 60px auto;
   padding:0 24px;
 }
@@ -297,6 +276,7 @@ body{
   color:#666;
   font-size:16px;
 }
+
 
 .breadcrumb-bar{
   display:flex;
@@ -355,6 +335,10 @@ body{
 /* Panels */
 .tab-panel{
   display:none;
+}
+
+.tab-panel.show-all{
+  display:block;
 }
 
 .tab-panel.is-active{
@@ -485,7 +469,6 @@ body{
 .data-table{
   width:100%;
   border-collapse:collapse;
-  min-width:900px;
 }
 
 .data-table th,
@@ -493,6 +476,15 @@ body{
   padding:14px 16px;
   border-top:1px solid rgba(0,0,0,0.06);
   text-align:left;
+}
+
+.data-table td{
+  white-space:normal;
+  overflow-wrap:break-word;
+  word-break:normal;
+}
+
+.data-table th{
   white-space:nowrap;
 }
 
@@ -552,6 +544,7 @@ body{
   padding: 60px 20px;
   color: #666;
   font-size: 16px;
+  width: 100%;
 }
 
 .results-message.error {
@@ -749,13 +742,6 @@ body{
 }
 
 /* ---------- Image Lightbox ---------- */
-.image-tile img {
-  cursor: zoom-in;
-  transition: transform 0.15s ease;
-}
-.image-tile img:hover {
-  transform: scale(1.02);
-}
 
 .image-credit,
 .image-source {
@@ -901,4 +887,772 @@ body{
     top: 8px;
     left: 8px;
   }
+}
+
+a.species-card {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+a.species-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.clickable-row:hover {
+  background: #f0f7f0;
+}
+
+.breadcrumbs {
+  padding: 12px 24px;
+  font-size: 14px;
+  color: #666;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.breadcrumbs a {
+  color: #76b476;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-sep {
+  margin: 0 8px;
+  color: #ccc;
+}
+
+.breadcrumb-current {
+  color: #333;
+  font-weight: 600;
+}
+
+.main-view {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.map-popup {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.popup-header {
+  padding: 12px 14px 8px;
+  font-size: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.popup-stats {
+  padding: 8px 14px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.popup-coords {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.popup-events {
+  border-top: 1px solid #eee;
+  padding: 8px 14px 12px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.popup-event-row {
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 12px;
+}
+
+.popup-event-row:last-child {
+  border-bottom: none;
+}
+
+.popup-event-date {
+  font-weight: 600;
+  color: #333;
+  min-width: 100px;
+}
+
+.popup-event-collector {
+  color: #666;
+  flex: 1;
+}
+
+.popup-event-elev {
+  color: #888;
+  font-size: 11px;
+}
+
+.popup-event-more {
+  padding-top: 6px;
+  font-size: 12px;
+  color: #76b476;
+  font-weight: 600;
+}
+
+.maplibregl-popup-content {
+  padding: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.view-toggle {
+  text-align: center;
+  margin: 10px 0 0 0;
+}
+
+.view-toggle-btn {
+  background: transparent;
+  border: 1px solid #ddd;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+}
+
+.view-toggle-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.species-page .tab-panel.is-active {
+  display: block;
+  width: 100%;
+}
+
+/* ---------- Species Two-Column Layout ---------- */
+.species-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.species-col-left,
+.species-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+
+/* Specimen list (replaces table for cleaner look) */
+.specimen-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.specimen-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.specimen-row-main {
+  font-size: 13px;
+}
+
+.specimen-row-sub {
+  font-size: 11px;
+}
+
+.specimen-row:hover {
+  background: #f0f7f0;
+}
+
+.specimen-row:last-child {
+  border-bottom: none;
+}
+
+.specimen-row-main {
+  font-weight: 600;
+  font-size: 14px;
+  color: #222;
+}
+
+.specimen-row-sub {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.specimen-row-arrow {
+  color: #76b476;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Image grid inside the right column */
+.species-col-right .image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.species-col-right .image-tile {
+  padding: 8px;
+}
+
+.species-col-right .image-tile img {
+  height: 100px;
+}
+
+@media (max-width: 900px) {
+  .species-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Image hero + thumbstrip layout */
+.species-col-right .image-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.image-hero {
+  width: 100%;
+  cursor: zoom-in;
+  position: relative;
+}
+
+.image-hero img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  border-radius: 8px 8px 0 0;
+  background: #fafafa;
+}
+
+.image-hero-caption {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #666;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+.image-thumbstrip {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: #fafafa;
+  border-radius: 0 0 8px 8px;
+}
+
+.image-thumb {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.image-thumb.is-active {
+  border-color: #76b476;
+}
+
+.image-thumb:hover {
+  border-color: #aaa;
+}
+
+.image-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.panel-card.tab-panel {
+  display: none;
+}
+
+.panel-card.tab-panel.is-active {
+  display: block;
+}
+
+.species-columns.tabbed-mode {
+  display: block;
+}
+
+.species-columns.tabbed-mode .panel-card {
+  max-width: 1300px;
+  margin: 0 auto 24px auto;
+}
+
+.image-group {
+  margin-bottom: 24px;
+}
+
+.image-group-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  text-transform: capitalize;
+}
+
+.image-group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.image-group-grid .image-tile {
+  margin: 0;
+  padding: 10px;
+  cursor: zoom-in;
+}
+
+.image-group-grid .image-tile img {
+  width: 100%;
+  height: 140px;
+  object-fit: contain;
+}
+
+.image-group-grid .image-tile figcaption {
+  font-size: 11px;
+  color: #666;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.image-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.image-filter-btn {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #555;
+  transition: all 0.15s;
+  text-transform: capitalize;
+}
+
+.image-filter-btn:hover {
+  border-color: #76b476;
+  color: #333;
+}
+
+.image-filter-btn.is-active {
+  background: #76b476;
+  color: white;
+  border-color: #76b476;
+}
+
+.image-filtered-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.image-filtered-grid .image-tile {
+  margin: 0;
+  padding: 10px;
+  cursor: zoom-in;
+}
+
+.image-filtered-grid .image-tile img {
+  width: 100%;
+  height: 140px;
+  object-fit: contain;
+}
+
+.image-filtered-grid .image-tile figcaption {
+  font-size: 11px;
+  color: #666;
+  margin-top: 6px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.image-angle-search {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.image-angle-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+#angle-chips {
+  margin-bottom: 12px;
+}
+
+#angle-chips .chip {
+  background: #76b476;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: capitalize;
+}
+
+#angle-chips .chip-remove {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.image-angle-controls {
+  margin-bottom: 16px;
+}
+
+.image-angle-controls select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  background: white;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+#angle-chips {
+  margin-top: 8px;
+}
+
+#angle-chips .chip {
+  background: #76b476;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: capitalize;
+}
+
+#angle-chips .chip-x {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.specimen-count {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #888;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+}
+
+.popup-specimens {
+  border-top: 1px solid #eee;
+  padding: 8px 14px 12px;
+}
+
+.popup-specimens-header {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.popup-specimen-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 12px;
+  color: #555;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.popup-specimen-row:hover {
+  color: #76b476;
+}
+
+.popup-specimen-row:last-child {
+  border-bottom: none;
+}
+
+.popup-specimen-arrow {
+  color: #76b476;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.species-page {
+  padding-bottom: 80px;
+}
+
+.species-page .panel-card {
+  margin-bottom: 24px;
+}
+
+.species-columns .panel-card {
+  height: 460px;
+  overflow: hidden;
+}
+
+#specimens,
+#map-panel {
+  height: 580px;
+  overflow: hidden;
+}
+
+#species-map {
+  width: 100%;
+  height: 500px;
+  border-radius: 8px;
+}
+
+#map-panel .maplibregl-popup {
+  z-index: 10;
+}
+
+.specimen-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #eee;
+}
+
+.spec-page-btn {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.spec-page-btn:hover:not(:disabled) {
+  background: #f0f7f0;
+  border-color: #76b476;
+}
+
+.spec-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.spec-page-info {
+  font-size: 13px;
+  color: #888;
+}
+
+.specimen-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+}
+
+.specimen-filter {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.specimen-count {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.specimen-dropdown {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 12px;
+  background: white;
+  cursor: pointer;
+  max-width: 180px;
+}
+
+.specimen-count-label {
+  font-size: 12px;
+  color: #888;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.clear-map-filter {
+  background: #d9534f;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.clear-map-filter:hover {
+  background: #c9302c;
+}
+
+.specimen-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.specimen-chips .chip {
+  background: #76b476;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.specimen-chips .chip-x {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.map-chip {
+  background: #d9534f !important;
+}
+
+.map-custom-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-ctrl-btn {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.map-ctrl-btn:hover {
+  background: #f5f5f5;
+}
+
+.map-ctrl-btn.active {
+  background: #76b476;
+  color: white;
+  border-color: #76b476;
+}
+
+.specimen-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.specimen-toggle input {
+  margin: 0;
+  cursor: pointer;
+}
+
+.year-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.year-input {
+  width: 70px;
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.year-range span {
+  color: #888;
+  font-size: 12px;
 }
