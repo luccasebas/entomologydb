@@ -1,19 +1,28 @@
 :root {
   --text-dark: #111111;
   --text-muted: #333333;
+  --accent: #7789AD;
+  --bg: #ffffff;
 }
 
 body {
   margin: 0;
-  background: #ffffff;
+  background: var(--bg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.loading-wrap {
-  height: 100vh;
+.hidden {
+  display: none !important;
+}
+
+.loading-wrap,
+.game-wrap {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
 }
 
 .loading-card {
@@ -46,9 +55,73 @@ body {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--text-muted);
+  line-height: 1.45;
 }
 
 .fact-bold {
   font-weight: 800;
   color: var(--text-dark);
+}
+
+.game-hint {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.game-wrap {
+  flex-direction: column;
+  gap: 16px;
+}
+
+.game-header {
+  width: min(1000px, calc(100vw - 40px));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-dark);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.game-title {
+  color: var(--accent);
+}
+
+#game-canvas {
+  display: block;
+  width: min(1000px, calc(100vw - 40px));
+  max-width: 1000px;
+  background: #ffffff;
+  border: 2px solid #111111;
+}
+
+.game-subtext {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .beetle-img {
+    width: 150px;
+  }
+
+  .fact {
+    max-width: 90vw;
+    font-size: 13px;
+  }
+
+  .game-header {
+    flex-direction: column;
+    gap: 6px;
+  }
 }
